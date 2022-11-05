@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Windows.Controls;
 
-namespace PitchFinder
+namespace PitchFinder.Models
 {
     public interface IModule
     {

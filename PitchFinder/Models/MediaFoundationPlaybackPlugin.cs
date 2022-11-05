@@ -1,6 +1,8 @@
-﻿using System.Windows.Controls;
+﻿using PitchFinder.ViewModels;
+using PitchFinder.Views;
+using System.Windows.Controls;
 
-namespace PitchFinder
+namespace PitchFinder.Models
 {
     class MediaFoundationPlaybackPlugin : ModuleBase
     {

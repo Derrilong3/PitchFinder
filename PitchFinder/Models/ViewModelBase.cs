@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace PitchFinder
+namespace PitchFinder.Models
 {
     class ViewModelBase : INotifyPropertyChanged
     {

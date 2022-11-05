@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Windows.Input;
 
-namespace PitchFinder
+namespace PitchFinder.Models
 {
     public class RelayCommand : ICommand
     {
@@ -18,7 +18,7 @@ namespace PitchFinder
         public RelayCommand(Action execute, Func<bool> canExecute)
             : this((s) => execute(), (s) => canExecute())
         {
-            
+
         }
 
         public RelayCommand(Action execute)

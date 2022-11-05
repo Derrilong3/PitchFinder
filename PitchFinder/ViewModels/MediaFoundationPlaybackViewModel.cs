@@ -2,6 +2,7 @@
 using OxyPlot;
 using OxyPlot.Axes;
 using OxyPlot.Series;
+using PitchFinder.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -11,7 +12,7 @@ using System.Windows;
 using System.Windows.Threading;
 using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
 
-namespace PitchFinder
+namespace PitchFinder.ViewModels
 {
     internal class MediaFoundationPlaybackViewModel : ViewModelBase, IDisposable
     {
@@ -47,7 +48,7 @@ namespace PitchFinder
             audioPlayback.BufferEventArgs += audioGraph_Buffer;
             audioPlayback.FftCalculated += AudioPlayback_FftCalculated;
             TimePosition = new TimeSpan(0, 0, 0).ToString("mm\\:ss");
-            PlotModel = new PlotModel(); 
+            PlotModel = new PlotModel();
             plotModel.Series.Add(new LineSeries());
         }
 
@@ -123,12 +124,9 @@ namespace PitchFinder
 
                 timered = false;
             }
-
-
-
         }
 
-        
+
         private void AudioPlayback_FftCalculated(object? sender, FftEventArgs e)
         {
 
@@ -317,7 +315,7 @@ namespace PitchFinder
         private void Play()
         {
 
-            if (String.IsNullOrEmpty(InputPath))
+            if (string.IsNullOrEmpty(InputPath))
             {
                 MessageBox.Show("Select a valid input file or URL first");
                 return;

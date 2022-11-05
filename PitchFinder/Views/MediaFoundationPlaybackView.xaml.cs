@@ -1,6 +1,6 @@
 ﻿using System.Windows.Controls;
 
-namespace PitchFinder
+namespace PitchFinder.Views
 {
     /// <summary>
     /// Interaction logic for MediaFoundationPlaybackView.xaml

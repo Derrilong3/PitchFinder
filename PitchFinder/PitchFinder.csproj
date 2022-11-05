@@ -8,8 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Accord.Audio" Version="3.8.0" />
-    <PackageReference Include="Accord.Math" Version="3.8.0" />
+    <PackageReference Include="Dirkster.AvalonDock" Version="4.70.3" />
     <PackageReference Include="FftSharp" Version="1.1.6" />
     <PackageReference Include="NAudio" Version="2.1.0" />
     <PackageReference Include="OxyPlot.Wpf" Version="2.1.0" />

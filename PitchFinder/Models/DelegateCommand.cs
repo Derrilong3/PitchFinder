@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Windows.Input;
 
-namespace PitchFinder
+namespace PitchFinder.Models
 {
     class DelegateCommand : ICommand
     {

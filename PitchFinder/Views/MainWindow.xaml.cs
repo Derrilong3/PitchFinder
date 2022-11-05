@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows;
 
-namespace PitchFinder
+namespace PitchFinder.Views
 {
     using System;
     using System.Reflection;

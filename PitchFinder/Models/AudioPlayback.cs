@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Windows;
 
-namespace PitchFinder
+namespace PitchFinder.Models
 {
     class AudioPlayback : IDisposable
     {
@@ -81,7 +81,7 @@ namespace PitchFinder
 
                 for (int i = 0; i < 9; i++)
                 {
-                    if ((freq >= baseFreq - 3) && (freq < baseFreq + 3) || (freq == baseFreq))
+                    if (freq >= baseFreq - 3 && freq < baseFreq + 3 || freq == baseFreq)
                     {
                         return note.Key + i;
                     }

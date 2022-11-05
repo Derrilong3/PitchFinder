@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Controls;
+using PitchFinder.Models;
 
-namespace PitchFinder
+namespace PitchFinder.ViewModels
 {
     class MainWindowViewModel : ViewModelBase
     {
