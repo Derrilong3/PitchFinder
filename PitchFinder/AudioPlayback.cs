@@ -10,7 +10,7 @@ namespace PitchFinder
     {
         public IWavePlayer PlaybackDevice { get; set; }
         public WaveStream FileStream { get; set; }
-
+        public int SampleRate { get; set; }
 
 
         Dictionary<string, float> noteBaseFreqs = new Dictionary<string, float>()
@@ -28,8 +28,6 @@ namespace PitchFinder
                 { "Bb", 29.14f },
                 { "B", 30.87f },
             };
-
-        public Pitch pitch;
 
         public event EventHandler<FftEventArgs> FftCalculated;
 
@@ -56,9 +54,9 @@ namespace PitchFinder
             {
                 var inputStream = new AudioFileReader(fileName);
                 var dd = new AudioFileReader(fileName);
-                pitch = new Pitch(dd);
                 FileStream = inputStream;
                 var aggregator = new SampleAggregator(inputStream);
+                SampleRate = inputStream.WaveFormat.SampleRate;
                 aggregator.NotificationCount = inputStream.WaveFormat.SampleRate / 100;
                 aggregator.PerformFFT = true;
                 aggregator.FftCalculated += (s, a) => FftCalculated?.Invoke(this, a);

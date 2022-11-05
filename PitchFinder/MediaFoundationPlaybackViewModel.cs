@@ -1,8 +1,12 @@
 ﻿using NAudio.Wave;
-using PitchFinder;
+using OxyPlot;
+using OxyPlot.Axes;
+using OxyPlot.Series;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
+using System.Reflection.Metadata;
 using System.Windows;
 using System.Windows.Threading;
 using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
@@ -14,8 +18,6 @@ namespace PitchFinder
         private int requestFloatOutput;
         private string inputPath;
         private string defaultDecompressionFormat;
-        //private IWavePlayer wavePlayer;
-        //private WaveStream reader;
         private AudioPlayback audioPlayback;
         public RelayCommand LoadCommand { get; }
         public RelayCommand PlayCommand { get; }
@@ -28,7 +30,10 @@ namespace PitchFinder
         private float singleFrequency;
         private string singleNote;
         private string timerPosition;
-
+        private PlotModel plotModel;
+        double[] AudioValues;
+        private bool timered;
+        public IList<DataPoint> Points { get; private set; }
         public MediaFoundationPlaybackViewModel()
         {
             inputPathHistory = new ObservableCollection<string>();
@@ -36,11 +41,97 @@ namespace PitchFinder
             PlayCommand = new RelayCommand(Play, () => !IsPlaying);
             PauseCommand = new RelayCommand(Pause, () => IsPlaying);
             StopCommand = new RelayCommand(Stop, () => !IsStopped);
-            timer.Interval = TimeSpan.FromMilliseconds(100);
+            timer.Interval = TimeSpan.FromMilliseconds(10);
             timer.Tick += TimerOnTick;
             audioPlayback = new AudioPlayback();
             audioPlayback.BufferEventArgs += audioGraph_Buffer;
+            audioPlayback.FftCalculated += AudioPlayback_FftCalculated;
             TimePosition = new TimeSpan(0, 0, 0).ToString("mm\\:ss");
+            PlotModel = new PlotModel(); 
+            plotModel.Series.Add(new LineSeries());
+        }
+
+
+        void audioGraph_Buffer(object sender, BufferEventArgs e)
+        {
+            //float freq = audioPlayback.pitch.Get(e.Buffer);
+            //if (freq != 0)
+            //{
+            //    SingleFrequency = freq;
+            //    SingleNote = audioPlayback.GetNote(freq);
+            //}
+
+            int bytesPerSamplePerChannel = audioPlayback.FileStream.WaveFormat.BitsPerSample / 8;
+            int bytesPerSample = bytesPerSamplePerChannel * audioPlayback.FileStream.WaveFormat.Channels;
+            int bufferSampleCount = e.Buffer.Length / bytesPerSample;
+
+            if (bufferSampleCount >= AudioValues.Length)
+            {
+                bufferSampleCount = AudioValues.Length;
+            }
+
+            if (bytesPerSamplePerChannel == 2 && audioPlayback.FileStream.WaveFormat.Encoding == WaveFormatEncoding.Pcm)
+            {
+                for (int i = 0; i < bufferSampleCount; i++)
+                    AudioValues[i] = BitConverter.ToInt16(e.Buffer, i * bytesPerSample);
+            }
+            else if (bytesPerSamplePerChannel == 4 && audioPlayback.FileStream.WaveFormat.Encoding == WaveFormatEncoding.Pcm)
+            {
+                for (int i = 0; i < bufferSampleCount; i++)
+                    AudioValues[i] = BitConverter.ToInt32(e.Buffer, i * bytesPerSample);
+            }
+            else if (bytesPerSamplePerChannel == 4 && audioPlayback.FileStream.WaveFormat.Encoding == WaveFormatEncoding.IeeeFloat)
+            {
+                for (int i = 0; i < bufferSampleCount; i++)
+                    AudioValues[i] = BitConverter.ToSingle(e.Buffer, i * bytesPerSample);
+            }
+            else
+            {
+                throw new NotSupportedException(audioPlayback.FileStream.WaveFormat.ToString());
+            }
+
+            if (timered)
+            {
+                var s = (LineSeries)PlotModel.Series[0];
+
+                s.Points.Clear();
+
+                double[] paddedAudio = FftSharp.Pad.ZeroPad(AudioValues);
+                double[] fftMag = FftSharp.Transform.FFTmagnitude(paddedAudio);
+                double[] freq = FftSharp.Transform.FFTfreq(audioPlayback.SampleRate, fftMag.Length);
+
+
+                for (int i = 0; i < freq.Length; i++)
+                {
+                    s.Points.Add(new DataPoint(freq[i], fftMag[i]));
+                }
+
+                // find the frequency peak
+                int peakIndex = 0;
+                for (int i = 0; i < fftMag.Length; i++)
+                {
+                    if (fftMag[i] > fftMag[peakIndex])
+                        peakIndex = i;
+                }
+                double fftPeriod = FftSharp.Transform.FFTfreqPeriod(audioPlayback.SampleRate, fftMag.Length);
+                float peakFrequency = (float)(fftPeriod * peakIndex);
+
+                SingleFrequency = peakFrequency;
+                SingleNote = audioPlayback.GetNote(peakFrequency);
+
+                PlotModel.InvalidatePlot(true);
+
+                timered = false;
+            }
+
+
+
+        }
+
+        
+        private void AudioPlayback_FftCalculated(object? sender, FftEventArgs e)
+        {
+
         }
 
         public bool IsPlaying => audioPlayback.PlaybackDevice != null && audioPlayback.PlaybackDevice.PlaybackState == PlaybackState.Playing;
@@ -54,6 +145,7 @@ namespace PitchFinder
 
         private void TimerOnTick(object sender, EventArgs eventArgs)
         {
+            timered = true;
             if (audioPlayback.FileStream != null)
             {
                 sliderPosition = Math.Min(SliderMax, audioPlayback.FileStream.Position * SliderMax / audioPlayback.FileStream.Length);
@@ -62,10 +154,20 @@ namespace PitchFinder
             }
         }
 
+        public PlotModel PlotModel
+        {
+            get => plotModel;
+            set
+            {
+                plotModel = value;
+                OnPropertyChanged("PlotModel");
+            }
+        }
+
         public string TimePosition
         {
-            get => timerPosition;        
-            set 
+            get => timerPosition;
+            set
             {
                 if (timerPosition == value)
                     return;
@@ -214,6 +316,7 @@ namespace PitchFinder
 
         private void Play()
         {
+
             if (String.IsNullOrEmpty(InputPath))
             {
                 MessageBox.Show("Select a valid input file or URL first");
@@ -231,7 +334,7 @@ namespace PitchFinder
             {
                 audioPlayback.Load(InputPath);
                 lastPlayed = inputPath;
-
+                AudioValues = new double[audioPlayback.SampleRate / 10];
             }
             audioPlayback.Play();
             OnPropertyChanged("IsPlaying");
@@ -243,16 +346,6 @@ namespace PitchFinder
         {
             audioPlayback.CreateDevice();
             audioPlayback.PlaybackDevice.PlaybackStopped += WavePlayerOnPlaybackStopped;
-        }
-
-        void audioGraph_Buffer(object sender, BufferEventArgs e)
-        {
-            float freq = audioPlayback.pitch.Get(e.Buffer);
-            if (freq != 0)
-            {
-                SingleFrequency = freq;
-                SingleNote = audioPlayback.GetNote(freq);
-            }
         }
 
         private void WavePlayerOnPlaybackStopped(object sender, StoppedEventArgs stoppedEventArgs)
@@ -278,6 +371,16 @@ namespace PitchFinder
             if (audioPlayback.FileStream != null)
             {
                 audioPlayback.CloseFile();
+                plotModel.Series.Clear();
+                plotModel.Series.Add(new LineSeries());
+                //plotModel.Axes.Clear();
+                //plotModel.Axes.Add(new LinearAxis
+                //{
+                //    Position = AxisPosition.Left,
+                //    zoo = 0.005d,
+                //    ActualMinimum = 0,
+                //});
+                plotModel.InvalidatePlot(true);
             }
             SelectInputFile();
         }

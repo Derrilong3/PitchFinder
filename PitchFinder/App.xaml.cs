@@ -5,6 +5,7 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Runtime.InteropServices;
 
 namespace PitchFinder
 {
@@ -15,6 +16,7 @@ namespace PitchFinder
     {
         private void Application_Startup(object sender, StartupEventArgs e)
         {
+            AllocConsole();
             var mainWindow = new MainWindow();
 
             var modules = ReflectionHelper.CreateAllInstancesOf<IModule>();
@@ -24,7 +26,9 @@ namespace PitchFinder
             mainWindow.Closing += (s, args) => vm.SelectedModule.Deactivate();
             mainWindow.Show();
         }
-
+        [DllImport("kernel32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        static extern bool AllocConsole();
         static class ReflectionHelper
         {
             public static IEnumerable<T> CreateAllInstancesOf<T>()

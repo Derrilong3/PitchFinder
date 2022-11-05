@@ -3,14 +3,16 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:oxy="clr-namespace:OxyPlot.Wpf;assembly=OxyPlot.Wpf"
+             xmlns:local="clr-namespace:PitchFinder"
              mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="500">
+             d:DesignHeight="700" d:DesignWidth="1000">
+
+    <UserControl.DataContext>
+        <local:MediaFoundationPlaybackViewModel/>
+    </UserControl.DataContext>
+
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="263*"/>
-        </Grid.RowDefinitions>
-        <TextBlock HorizontalAlignment="Left" Margin="10,10,0,0" TextWrapping="Wrap" Text="Demonstrates the use of the MediaFoundationReader for playback, repositioning. Currently a work in progress" VerticalAlignment="Top" />
         <Button Grid.Row="1" Content="..." Command="{Binding LoadCommand}" Margin="0,10.08,10,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="34" />
         <Button Grid.Row="1" Content="Play" Command="{Binding PlayCommand}" HorizontalAlignment="Left" Margin="11,73.08,0,0" VerticalAlignment="Top" Width="75" />
         <Button Grid.Row="1" Content="Pause" Command="{Binding PauseCommand}" HorizontalAlignment="Left" Margin="91,73.08,0,0" VerticalAlignment="Top" Width="75" />
@@ -25,8 +27,9 @@
         <TextBlock HorizontalAlignment="Left" Margin="11,11.08,0,0" Grid.Row="1" TextWrapping="Wrap" Text="Selected File or URL:" VerticalAlignment="Top"/>
         <ComboBox Text="{Binding InputPath, Mode=TwoWay}" ItemsSource="{Binding InputPathHistory}" Margin="126,10.08,49,0" Grid.Row="1" VerticalAlignment="Top" IsEditable="True"/>
         <TextBox IsReadOnly="True" HorizontalAlignment="Left" Height="26" Margin="91,129,0,0" Grid.Row="1" TextWrapping="Wrap" Text="{Binding SingleFrequency, Mode=TwoWay}" VerticalAlignment="Top" Width="75" TextAlignment="Center"/>
-        <TextBox IsReadOnly="True" HorizontalAlignment="Left" Height="119" Margin="288,129,0,0" Grid.Row="1" TextWrapping="Wrap" Text="{Binding SingleNote, Mode=TwoWay}" VerticalAlignment="Top" Width="163" TextAlignment="Center" FontSize="24"/>
+        <TextBox IsReadOnly="True" HorizontalAlignment="Left" Height="60" Margin="208,129,0,0" TextWrapping="Wrap" Text="{Binding SingleNote, Mode=TwoWay}" VerticalAlignment="Top" Width="60" TextAlignment="Center" FontSize="24" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
         <Label Content="{Binding TimePosition}" HorizontalAlignment="Right" Margin="0,73,10,0" Grid.Row="1" VerticalAlignment="Top" Height="27" Width="56"/>
-
+        <oxy:PlotView Model="{Binding PlotModel}" Margin="10,276,10,0" VerticalAlignment="Top" Height="208"/>
+ 
     </Grid>
 </UserControl>

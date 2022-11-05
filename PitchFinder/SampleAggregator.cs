@@ -1,7 +1,8 @@
-﻿using System;
-using System.Diagnostics;
+﻿using NAudio.CoreAudioApi;
 using NAudio.Dsp;
 using NAudio.Wave;
+using System;
+using System.Diagnostics;
 
 public class SampleAggregator : IWaveProvider
 {
@@ -16,17 +17,18 @@ public class SampleAggregator : IWaveProvider
     public event EventHandler<FftEventArgs> FftCalculated;
     public event EventHandler<BufferEventArgs> BufferEventArgs;
     public bool PerformFFT { get; set; }
-    private readonly Complex[] fftBuffer;
+    private readonly System.Numerics.Complex[] fftBuffer;
     private readonly FftEventArgs fftArgs;
     private int fftPos;
     private readonly int fftLength;
     private readonly int m;
     private readonly IWaveProvider source;
-
+    
     private readonly int channels;
 
-    public SampleAggregator(IWaveProvider source, int fftLength = 1024)
+    public SampleAggregator(IWaveProvider source, int fftLength = 4096)
     {
+        
         channels = source.WaveFormat.Channels;
         if (!IsPowerOfTwo(fftLength))
         {
@@ -34,7 +36,7 @@ public class SampleAggregator : IWaveProvider
         }
         m = (int)Math.Log(fftLength, 2.0);
         this.fftLength = fftLength;
-        fftBuffer = new Complex[fftLength];
+        fftBuffer = new System.Numerics.Complex[fftLength];
         fftArgs = new FftEventArgs(fftBuffer);
         this.source = source;
     }
@@ -55,14 +57,15 @@ public class SampleAggregator : IWaveProvider
     {
         if (PerformFFT && FftCalculated != null)
         {
-            fftBuffer[fftPos].X = (float)(value * FastFourierTransform.HammingWindow(fftPos, fftLength));
-            fftBuffer[fftPos].Y = 0;
+            fftBuffer[fftPos] = new System.Numerics.Complex(value * FastFourierTransform.HannWindow(fftPos, fftLength), 0);
+            //fftBuffer[fftPos].Y = 0;
             fftPos++;
             if (fftPos >= fftBuffer.Length)
             {
                 fftPos = 0;
                 // 1024 = 2^10
-                FastFourierTransform.FFT(true, m, fftBuffer);
+                Accord.Math.FourierTransform.FFT(fftBuffer, Accord.Math.FourierTransform.Direction.Forward);
+                //FastFourierTransform.FFT(true, m, fftBuffer);
                 FftCalculated(this, fftArgs);
             }
         }
@@ -83,10 +86,10 @@ public class SampleAggregator : IWaveProvider
     {
         var samplesRead = source.Read(buffer, offset, count);
         BufferEventArgs.Invoke(this, new BufferEventArgs(buffer));
-        for (int n = 0; n < samplesRead; n += channels)
-        {
-            Add(buffer[n + offset]);
-        }
+        //for (int n = 0; n < samplesRead; n += channels)
+        //{
+        //    Add(buffer[n + offset]);
+        //}
         return samplesRead;
     }
 }
@@ -106,11 +109,11 @@ public class MaxSampleEventArgs : EventArgs
 public class FftEventArgs : EventArgs
 {
     [DebuggerStepThrough]
-    public FftEventArgs(Complex[] result)
+    public FftEventArgs(System.Numerics.Complex[] result)
     {
         Result = result;
     }
-    public Complex[] Result { get; private set; }
+    public System.Numerics.Complex[] Result { get; private set; }
 }
 
 public class BufferEventArgs : EventArgs
