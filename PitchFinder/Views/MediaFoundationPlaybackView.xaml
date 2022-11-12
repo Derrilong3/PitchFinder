@@ -12,6 +12,7 @@
         <local:MediaFoundationPlaybackViewModel/>
     </UserControl.DataContext>
 
+
     <Grid>
         <Button Grid.Row="1" Content="..." Command="{Binding LoadCommand}" Margin="0,10.08,10,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="34" />
         <Button Grid.Row="1" Content="Play" Command="{Binding PlayCommand}" HorizontalAlignment="Left" Margin="11,73.08,0,0" VerticalAlignment="Top" Width="75" />
@@ -29,7 +30,27 @@
         <TextBox IsReadOnly="True" HorizontalAlignment="Left" Height="26" Margin="91,129,0,0" Grid.Row="1" TextWrapping="Wrap" Text="{Binding SingleFrequency, Mode=TwoWay}" VerticalAlignment="Top" Width="75" TextAlignment="Center"/>
         <TextBox IsReadOnly="True" HorizontalAlignment="Left" Height="60" Margin="208,129,0,0" TextWrapping="Wrap" Text="{Binding SingleNote, Mode=TwoWay}" VerticalAlignment="Top" Width="60" TextAlignment="Center" FontSize="24" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
         <Label Content="{Binding TimePosition}" HorizontalAlignment="Right" Margin="0,73,10,0" Grid.Row="1" VerticalAlignment="Top" Height="27" Width="56"/>
-        <oxy:PlotView Model="{Binding PlotModel}" Margin="10,276,10,0" VerticalAlignment="Top" Height="208"/>
- 
+        <oxy:PlotView Model="{Binding PlotModel}" Margin="10,276,10,0" VerticalAlignment="Top" Height="275"/>
+
+        <ListView ItemsSource="{Binding ColorMulti}" Margin="0,222,27,0" HorizontalAlignment="Right" VerticalAlignment="Top">
+            <ListView.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Orientation="Horizontal"></StackPanel>
+                </ItemsPanelTemplate>
+            </ListView.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Border Width="47" Height="41">
+                        <Border.Background>
+                            <SolidColorBrush Color="{Binding Color}"/>
+                        </Border.Background>
+                        <TextBlock Text="{Binding Text}" Foreground="White" FontSize="20" TextAlignment="Center"/>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ListView>
+
+
+
     </Grid>
 </UserControl>

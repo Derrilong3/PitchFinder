@@ -2,6 +2,7 @@
 using NAudio.Wave;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 
 namespace PitchFinder.Models
@@ -13,7 +14,7 @@ namespace PitchFinder.Models
         public int SampleRate { get; set; }
 
 
-        Dictionary<string, float> noteBaseFreqs = new Dictionary<string, float>()
+        public Dictionary<string, float> noteBaseFreqs = new Dictionary<string, float>()
             {
                 { "C", 16.35f },
                 { "C#", 17.32f },
@@ -28,6 +29,36 @@ namespace PitchFinder.Models
                 { "Bb", 29.14f },
                 { "B", 30.87f },
             };
+
+        public double[] GetNotesMulti(List<Tuple<double, double>> tuples, int maxOctava = 6)
+        {    
+            double[] output = new double[noteBaseFreqs.Count];
+            double sum;
+            double noteFreq;
+            double curFreq;
+            double OnePercent;
+
+            for (int i = 0; i < output.Length; i++)
+            {
+                sum = 0;
+                noteFreq = noteBaseFreqs.ElementAt(i).Value;              
+                for (int j = 0; j < maxOctava; j++)
+                {
+                    curFreq = noteFreq * Math.Pow(2, j);
+                    OnePercent = curFreq * 0.01d;
+                    var array = tuples.FindAll(x => curFreq - OnePercent < x.Item1 && x.Item1 < curFreq + OnePercent).MaxBy(x => x.Item2);
+
+                    if (array != null)
+                    {
+                        sum += array.Item2;
+                    }
+                }
+
+                output[i] = sum;
+            }
+
+            return output;
+        }
 
         public event EventHandler<FftEventArgs> FftCalculated;
 

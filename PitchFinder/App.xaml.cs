@@ -19,7 +19,7 @@ namespace PitchFinder
     {
         private void Application_Startup(object sender, StartupEventArgs e)
         {
-            AllocConsole();
+            //AllocConsole();
             var mainWindow = new MainWindow();
 
             var modules = ReflectionHelper.CreateAllInstancesOf<IModule>();
