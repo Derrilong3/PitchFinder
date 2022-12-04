@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel;
 
-namespace PitchFinder.Models
+namespace PitchFinder.ViewModels
 {
-    class ViewModelBase : INotifyPropertyChanged
+    public class ViewModelBase : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
 

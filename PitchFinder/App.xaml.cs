@@ -21,26 +21,9 @@ namespace PitchFinder
         {
             //AllocConsole();
             var mainWindow = new MainWindow();
-
-            var modules = ReflectionHelper.CreateAllInstancesOf<IModule>();
-
-            var vm = new MainWindowViewModel(modules);
+            var vm = new MainViewModel();
             mainWindow.DataContext = vm;
-            mainWindow.Closing += (s, args) => vm.SelectedModule.Deactivate();
             mainWindow.Show();
-        }
-        [DllImport("kernel32.dll", SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        static extern bool AllocConsole();
-        static class ReflectionHelper
-        {
-            public static IEnumerable<T> CreateAllInstancesOf<T>()
-            {
-                return typeof(ReflectionHelper).Assembly.GetTypes()
-                    .Where(t => typeof(T).IsAssignableFrom(t))
-                    .Where(t => !t.IsAbstract && t.IsClass)
-                    .Select(t => (T)Activator.CreateInstance(t));
-            }
         }
     }
 }
