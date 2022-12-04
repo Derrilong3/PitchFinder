@@ -1,14 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Runtime.InteropServices;
-using PitchFinder.Models;
+﻿using PitchFinder.ViewModels;
 using PitchFinder.Views;
-using PitchFinder.ViewModels;
+using System.Windows;
 
 namespace PitchFinder
 {
