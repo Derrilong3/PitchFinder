@@ -9,7 +9,7 @@ using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
 
 namespace PitchFinder.ViewModels
 {
-    internal class MediaPlaybackViewModel : DockWindowViewModel, IDisposable
+    internal class MediaPlaybackViewModel : ToolViewModel, IDisposable
     {
         private readonly ObservableCollection<string> inputPathHistory;
         private readonly DispatcherTimer timer = new DispatcherTimer();
@@ -24,8 +24,9 @@ namespace PitchFinder.ViewModels
         public RelayCommand PauseCommand { get; }
         public RelayCommand StopCommand { get; }
 
-        public MediaPlaybackViewModel()
+        public MediaPlaybackViewModel() : base("Media Window")
         {
+            ContentId = "MediaTool";
             model = new AudioAnalyzeModel();
             model.PlaybackStopped += WavePlayerOnPlaybackStopped;
             model.PropertyChanged += (s, e) => OnPropertyChanged(e.PropertyName);

@@ -1,22 +1,20 @@
-﻿using PitchFinder.Views;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace PitchFinder.ViewModels
 {
     internal class MainViewModel
     {
-        public DockManagerViewModel DockManagerViewModel { get; private set; }
         public MenuViewModel MenuViewModel { get; private set; }
+        public IEnumerable<ToolViewModel> Anchorables { get; private set; }
 
         public MainViewModel()
         {
-            var documents = new List<DockWindowViewModel>()
+            Anchorables = new List<ToolViewModel>()
             {
-                new MediaPlaybackViewModel() {Title = "Media Window"}
+                new MediaPlaybackViewModel()
             };
 
-            this.DockManagerViewModel = new DockManagerViewModel(documents);
-            this.MenuViewModel = new MenuViewModel(documents);
+            MenuViewModel = new MenuViewModel(Anchorables);
         }
     }
 }

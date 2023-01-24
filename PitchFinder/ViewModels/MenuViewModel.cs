@@ -8,7 +8,7 @@ namespace PitchFinder.ViewModels
 
         private readonly MenuItemViewModel ViewMenuItemViewModel;
 
-        public MenuViewModel(IEnumerable<DockWindowViewModel> dockWindows)
+        public MenuViewModel(IEnumerable<ToolViewModel> dockWindows)
         {
             var view = this.ViewMenuItemViewModel = new MenuItemViewModel() { Header = "Tools" };
 
@@ -20,24 +20,24 @@ namespace PitchFinder.ViewModels
             this.Items = items;
         }
 
-        private MenuItemViewModel GetMenuItemViewModel(DockWindowViewModel dockWindowViewModel)
+        private MenuItemViewModel GetMenuItemViewModel(ToolViewModel dockWindowViewModel)
         {
             var menuItemViewModel = new MenuItemViewModel();
             menuItemViewModel.IsCheckable = true;
 
             menuItemViewModel.Header = dockWindowViewModel.Title;
-            menuItemViewModel.IsChecked = !dockWindowViewModel.IsClosed;
+            menuItemViewModel.IsChecked = dockWindowViewModel.IsVisible;
 
             dockWindowViewModel.PropertyChanged += (o, e) =>
             {
-                if (e.PropertyName == nameof(DockWindowViewModel.IsClosed))
-                    menuItemViewModel.IsChecked = !dockWindowViewModel.IsClosed;
+                if (e.PropertyName == nameof(ToolViewModel.IsVisible))
+                    menuItemViewModel.IsChecked = dockWindowViewModel.IsVisible;
             };
 
             menuItemViewModel.PropertyChanged += (o, e) =>
             {
                 if (e.PropertyName == nameof(MenuItemViewModel.IsChecked))
-                    dockWindowViewModel.IsClosed = !menuItemViewModel.IsChecked;
+                    dockWindowViewModel.IsVisible = menuItemViewModel.IsChecked;
             };
 
             return menuItemViewModel;

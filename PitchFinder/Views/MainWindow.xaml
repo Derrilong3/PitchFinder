@@ -4,12 +4,23 @@
         xmlns:local="clr-namespace:PitchFinder.ViewModels" 
         xmlns:dock="https://github.com/Dirkster99/AvalonDock" 
         xmlns:v="clr-namespace:PitchFinder.Views"
+        xmlns:m="clr-namespace:PitchFinder.Models"
+        xmlns:sys="clr-namespace:System;assembly=System.Runtime"
         Title="WPF App" Height="700" Width="800">
 
     <Window.DataContext>
         <local:MainViewModel/>
     </Window.DataContext>
 
+    <Window.Resources>
+        <sys:Boolean x:Key="TRUE">True</sys:Boolean>
+        <sys:Boolean x:Key="FALSE">False</sys:Boolean>
+        <m:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+        <DataTemplate DataType="{x:Type local:MediaPlaybackViewModel}">
+            <v:MediaFoundationPlaybackView/>
+        </DataTemplate>
+    </Window.Resources>
+    
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -28,24 +39,16 @@
             </Menu.Resources>
         </Menu>
 
-        <dock:DockingManager Grid.Row="1"
-                         DataContext="{Binding DockManagerViewModel}"
-                         DocumentsSource="{Binding Documents}"
-                         AnchorablesSource="{Binding Anchorables}" >
+        <dock:DockingManager x:Name="dockManager" Grid.Row="1"
+                         AnchorablesSource="{Binding Anchorables}">
 
-            <dock:DockingManager.Resources>
-
-                <DataTemplate DataType="{x:Type local:MediaPlaybackViewModel}">
-                    <v:MediaFoundationPlaybackView/>
-                </DataTemplate>
-            </dock:DockingManager.Resources>
-
-            <dock:DockingManager.LayoutItemContainerStyle>
-                <!-- you can add additional bindings from the layoutitem to the DockWindowViewModel -->
-                <Style TargetType="{x:Type dock:LayoutItem}" >
+                <dock:DockingManager.LayoutItemContainerStyle>
+                <Style TargetType="{x:Type LayoutAnchorableItem}">
                     <Setter Property="Title" Value="{Binding Model.Title}" />
-                    <Setter Property="CloseCommand" Value="{Binding Model.CloseCommand}" />
-                    <Setter Property="CanClose" Value="{Binding Model.CanClose}" />
+                    <Setter Property="ContentId" Value="{Binding Model.ContentId}" />
+                    <Setter Property="IsSelected" Value="{Binding Model.IsSelected, Mode=TwoWay}" />
+                    <Setter Property="IsActive" Value="{Binding Model.IsActive, Mode=TwoWay}" />
+                    <Setter Property="Visibility" Value="{Binding Model.IsVisible, Mode=TwoWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter={StaticResource FALSE}}" />
                 </Style>
             </dock:DockingManager.LayoutItemContainerStyle>
         </dock:DockingManager>
