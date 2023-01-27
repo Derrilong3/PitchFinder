@@ -77,6 +77,24 @@ namespace PitchFinder.ViewModels
             get => model.ColorMulti;
         }
 
+        public ObservableCollection<FftSharp.IWindow> WindowFunctions
+        {
+            get => model.WindowFunctions;
+        }
+
+        public FftSharp.IWindow SelectedFunc
+        {
+            get
+            {
+                return model.WindowFunc;
+            }
+            set 
+            {
+                model.WindowFunc = value; 
+                OnPropertyChanged("SelectedFunc"); 
+            }
+        }
+
         public float SingleFrequency
         {
             get => model.SingleFrequency;

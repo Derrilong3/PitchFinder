@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Media;
 using System.Windows.Threading;
 
@@ -20,8 +21,10 @@ namespace PitchFinder.Models
         private readonly DispatcherTimer timer = new DispatcherTimer();
         private float singleFrequency;
         private string singleNote;
+        private bool timered;
 
-        public ObservableCollection<NoteBox> ColorMulti { get; set; }
+        public ObservableCollection<NoteBox> ColorMulti { get; private set; }
+        public ObservableCollection<FftSharp.IWindow> WindowFunctions { get; private set; }
 
         public AudioAnalyzeModel()
         {
@@ -37,6 +40,15 @@ namespace PitchFinder.Models
                 ColorMulti.Add(new NoteBox() { Text = audioPlayback.noteBaseFreqs.ElementAt(i).Key, Color = Color.FromRgb(0, 0, 0) });
             }
 
+            WindowFunctions = new ObservableCollection<FftSharp.IWindow>();
+
+            foreach(FftSharp.IWindow window in FftSharp.Window.GetWindows())
+            {
+                WindowFunctions.Add(window);
+            }
+
+            WindowFunc = WindowFunctions.First(x => x.Name == "Hanning");
+
             timer.Interval = TimeSpan.FromMilliseconds(10);
             timer.Tick += TimerOnTick;
         }
@@ -45,47 +57,7 @@ namespace PitchFinder.Models
 
         private void TimerOnTick(object sender, EventArgs eventArgs)
         {
-            var s = (LineSeries)PlotModel.Series[0];
-
-            s.Points.Clear();
-
-            double[] paddedAudio = FftSharp.Pad.ZeroPad(AudioValues);
-            double[] fftMag = FftSharp.Transform.FFTmagnitude(paddedAudio);
-            double[] freq = FftSharp.Transform.FFTfreq(audioPlayback.SampleRate, fftMag.Length);
-
-            List<Tuple<double, double>> list = new List<Tuple<double, double>>();
-            for (int i = 0; i < freq.Length; i++)
-            {
-                list.Add(new(freq[i], fftMag[i]));
-                s.Points.Add(new DataPoint(freq[i], fftMag[i]));
-            }
-
-            NoteBox[] colors = new NoteBox[12];
-            double[] c = audioPlayback.GetNotesMulti(list, 7);
-
-            ColorMulti.Clear();
-
-            for (int i = 0; i < colors.Length; i++)
-            {
-                double raw_G = 255 * c[i] * 12d;
-                byte G = raw_G > 255 ? (byte)255 : (byte)raw_G;
-                colors[i] = new NoteBox() { Text = audioPlayback.noteBaseFreqs.ElementAt(i).Key, Color = Color.FromRgb(0, G, 0) };
-                ColorMulti.Add(colors[i]);
-            }
-
-            //find the frequency peak
-            int peakIndex = 0;
-            for (int i = 0; i < fftMag.Length; i++)
-            {
-                if (fftMag[i] > fftMag[peakIndex])
-                    peakIndex = i;
-            }
-            double fftPeriod = FftSharp.Transform.FFTfreqPeriod(audioPlayback.SampleRate, fftMag.Length);
-            float peakFrequency = (float)(fftPeriod * peakIndex);
-
-            SingleFrequency = peakFrequency;
-            SingleNote = audioPlayback.GetNote(peakFrequency);
-            PlotModel.InvalidatePlot(true);
+            timered = true;
         }
 
         void audioGraph_Buffer(object sender, BufferEventArgs e)
@@ -118,6 +90,57 @@ namespace PitchFinder.Models
             {
                 throw new NotSupportedException(audioPlayback.FileStream.WaveFormat.ToString());
             }
+
+            if (timered)
+            {
+                Task.Run(() =>
+                {
+                    var s = (LineSeries)PlotModel.Series[0];
+
+                    s.Points.Clear();
+
+                    double[] windowed = WindowFunc.Apply(AudioValues);
+                    double[] paddedAudio = FftSharp.Pad.ZeroPad(AudioValues);
+                    double[] fftMag = FftSharp.Transform.FFTmagnitude(paddedAudio);
+                    double[] freq = FftSharp.Transform.FFTfreq(audioPlayback.SampleRate, fftMag.Length);
+
+                    List<Tuple<double, double>> list = new List<Tuple<double, double>>();
+                    for (int i = 0; i < freq.Length; i++)
+                    {
+                        list.Add(new(freq[i], fftMag[i]));
+                        s.Points.Add(new DataPoint(freq[i], fftMag[i]));
+                    }
+
+                    double[] c = audioPlayback.GetNotesMulti(list, 7);
+
+                    App.Current.Dispatcher.Invoke((System.Action)delegate
+                    {
+                        for (int i = 0; i < ColorMulti.Count; i++)
+                        {
+                            double raw_G = 255 * c[i] * 12d;
+                            byte G = raw_G > 255 ? (byte)255 : (byte)raw_G;
+                            ColorMulti[i].Color = Color.FromRgb(0, G, 0);
+                        }
+                    });
+
+                    //find the frequency peak
+                    int peakIndex = 0;
+                    for (int i = 0; i < fftMag.Length; i++)
+                    {
+                        if (fftMag[i] > fftMag[peakIndex])
+                            peakIndex = i;
+                    }
+                    double fftPeriod = FftSharp.Transform.FFTfreqPeriod(audioPlayback.SampleRate, fftMag.Length);
+                    float peakFrequency = (float)Math.Round((fftPeriod * peakIndex) * 100f) / 100f;
+
+                    SingleFrequency = peakFrequency;
+                    SingleNote = audioPlayback.GetNote(peakFrequency);
+                    PlotModel.InvalidatePlot(true);
+                });
+
+
+                timered = false;
+            }
         }
 
         public string InputPath { get; set; }
@@ -136,6 +159,11 @@ namespace PitchFinder.Models
                 plotModel = value;
                 OnPropertyChanged("PlotModel");
             }
+        }
+
+        public FftSharp.IWindow WindowFunc
+        {
+            get; set;
         }
 
         public float SingleFrequency

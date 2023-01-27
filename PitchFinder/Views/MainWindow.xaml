@@ -6,7 +6,7 @@
         xmlns:v="clr-namespace:PitchFinder.Views"
         xmlns:m="clr-namespace:PitchFinder.Models"
         xmlns:sys="clr-namespace:System;assembly=System.Runtime"
-        Title="WPF App" Height="700" Width="800">
+        Title="WPF App" Height="700" Width="1000">
 
     <Window.DataContext>
         <local:MainViewModel/>

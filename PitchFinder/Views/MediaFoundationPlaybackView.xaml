@@ -13,24 +13,29 @@
     </UserControl.DataContext>
 
     <Grid>
-        <Button Grid.Row="1" Content="..." Command="{Binding LoadCommand}" Margin="0,10.08,10,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="34" />
-        <Button Grid.Row="1" Content="Play" Command="{Binding PlayCommand}" HorizontalAlignment="Left" Margin="11,73.08,0,0" VerticalAlignment="Top" Width="75" />
-        <Button Grid.Row="1" Content="Pause" Command="{Binding PauseCommand}" HorizontalAlignment="Left" Margin="91,73.08,0,0" VerticalAlignment="Top" Width="75" />
-        <Button Grid.Row="1" Content="Stop" Command="{Binding StopCommand}" HorizontalAlignment="Left" Margin="171,73.08,0,0" VerticalAlignment="Top" Width="75" />
-        <Label Grid.Row="1" Content="Frequency:" HorizontalAlignment="Left" Margin="10,129,0,0" VerticalAlignment="Top" />
-        <Label Grid.Row="1" Content="Default PCM decompression format:" HorizontalAlignment="Left" Margin="11,34.08,0,0" VerticalAlignment="Top" />
-        <Label Grid.Row="1" Content="{Binding DefaultDecompressionFormat}" HorizontalAlignment="Left" Margin="211,34.08,0,0" VerticalAlignment="Top" />
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="250"/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <Button Content="..." Command="{Binding LoadCommand}" Margin="0,10,10,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="34" Grid.Column="1" />
+        <Button Content="Play" Command="{Binding PlayCommand}" HorizontalAlignment="Left" Margin="11,73,0,0" VerticalAlignment="Top" Width="75" />
+        <Button Content="Pause" Command="{Binding PauseCommand}" HorizontalAlignment="Left" Margin="91,73,0,0" VerticalAlignment="Top" Width="75" />
+        <Button Content="Stop" Command="{Binding StopCommand}" HorizontalAlignment="Left" Margin="171,73,0,0" VerticalAlignment="Top" Width="75" />
+        <Label Content="Frequency:" HorizontalAlignment="Left" Margin="11,129,0,0" VerticalAlignment="Top" Height="26" Width="76" />
+        <Label Content="Default PCM decompression format:" HorizontalAlignment="Left" Margin="11,34,0,0" VerticalAlignment="Top" />
+        <Label Content="{Binding DefaultDecompressionFormat}" HorizontalAlignment="Left" Margin="211,34,0,0" VerticalAlignment="Top" />
+        <Label Content="Window:" HorizontalAlignment="Left" Margin="11,231,0,0" VerticalAlignment="Top" Width="75"/>
 
-        <Slider Grid.Row="1" Margin="11,100,10,0" VerticalAlignment="Top" Value="{Binding SliderPosition, Mode=TwoWay}" AutoToolTipPlacement="None" Orientation="Horizontal" />
+        <Slider Margin="11,100,10,0" VerticalAlignment="Top" Value="{Binding SliderPosition, Mode=TwoWay}" AutoToolTipPlacement="None" Orientation="Horizontal" Grid.ColumnSpan="2" />
 
-        <TextBlock HorizontalAlignment="Left" Margin="11,11.08,0,0" Grid.Row="1" TextWrapping="Wrap" Text="Selected File or URL:" VerticalAlignment="Top"/>
-        <ComboBox Text="{Binding InputPath, Mode=TwoWay}" ItemsSource="{Binding InputPathHistory}" Margin="126,10.08,49,0" Grid.Row="1" VerticalAlignment="Top" IsEditable="True"/>
-        <TextBox IsReadOnly="True" HorizontalAlignment="Left" Height="26" Margin="91,129,0,0" Grid.Row="1" TextWrapping="Wrap" Text="{Binding SingleFrequency, Mode=OneWay}" VerticalAlignment="Top" Width="75" TextAlignment="Center"/>
-        <TextBox IsReadOnly="True" HorizontalAlignment="Left" Height="60" Margin="208,129,0,0" TextWrapping="Wrap" Text="{Binding SingleNote, Mode=OneWay}" VerticalAlignment="Top" Width="60" TextAlignment="Center" FontSize="24" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
-        <Label Content="{Binding TimePosition}" HorizontalAlignment="Right" Margin="0,73,10,0" Grid.Row="1" VerticalAlignment="Top" Height="27" Width="56"/>
-        <oxy:PlotView Model="{Binding PlotModel}" Margin="10,276,10,0" VerticalAlignment="Top" Height="275"/>
+        <TextBlock HorizontalAlignment="Left" Margin="11,11,0,0" TextWrapping="Wrap" Text="Selected File or URL:" VerticalAlignment="Top"/>
+        <ComboBox Text="{Binding InputPath, Mode=TwoWay}" ItemsSource="{Binding InputPathHistory}" Margin="126,10,49,0" VerticalAlignment="Top" IsEditable="True" Grid.ColumnSpan="2"/>
+        <TextBox IsReadOnly="True" HorizontalAlignment="Left" Height="26" Margin="98,129,0,0" TextWrapping="Wrap" Text="{Binding SingleFrequency, Mode=OneWay}" VerticalAlignment="Top" Width="60" TextAlignment="Center"/>
+        <TextBox IsReadOnly="True" HorizontalAlignment="Left" Height="60" Margin="98,160,0,0" TextWrapping="Wrap" Text="{Binding SingleNote, Mode=OneWay}" VerticalAlignment="Top" Width="60" TextAlignment="Center" FontSize="24" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+        <Label Content="{Binding TimePosition}" HorizontalAlignment="Right" Margin="0,73,10,0" VerticalAlignment="Top" Height="27" Width="56" Grid.Column="1"/>
+        <oxy:PlotView Model="{Binding PlotModel}" Margin="10,276,10,0" VerticalAlignment="Top" Height="275" Grid.ColumnSpan="2"/>
 
-        <ListView ItemsSource="{Binding ColorMulti}" Margin="0,222,27,0" HorizontalAlignment="Right" VerticalAlignment="Top">
+        <ListView ItemsSource="{Binding ColorMulti}" Margin="0,222,27,0" HorizontalAlignment="Right" VerticalAlignment="Top" Grid.Column="1">
             <ListView.ItemsPanel>
                 <ItemsPanelTemplate>
                     <StackPanel Orientation="Horizontal"></StackPanel>
@@ -47,8 +52,10 @@
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ListView>
-
-
-
+        <ComboBox ItemsSource="{Binding WindowFunctions}" SelectedItem="{Binding SelectedFunc}" HorizontalAlignment="Left" Margin="98,231,0,0" VerticalAlignment="Top" Width="120" Height="26">
+            <ComboBox.ToolTip>
+                <TextBox Width="250" TextWrapping="Wrap" Text="{Binding SelectedFunc.Description, Mode=OneWay}"/>
+            </ComboBox.ToolTip>
+        </ComboBox>
     </Grid>
 </UserControl>
