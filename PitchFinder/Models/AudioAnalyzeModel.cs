@@ -47,7 +47,7 @@ namespace PitchFinder.Models
                 WindowFunctions.Add(window);
             }
 
-            WindowFunc = WindowFunctions.First(x => x.Name == "Hanning");
+            WindowFunc = WindowFunctions[Properties.Settings.Default.selectedFunc];
 
             timer.Interval = TimeSpan.FromMilliseconds(10);
             timer.Tick += TimerOnTick;

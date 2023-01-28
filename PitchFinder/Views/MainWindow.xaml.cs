@@ -42,6 +42,7 @@ namespace PitchFinder.Views
         {
             var serializer = new AvalonDock.Layout.Serialization.XmlLayoutSerializer(dockManager);
             serializer.Serialize(@".\AvalonDock.config");
+            Properties.Settings.Default.Save();
         }
     }
 }

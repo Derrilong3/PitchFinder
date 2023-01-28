@@ -90,7 +90,8 @@ namespace PitchFinder.ViewModels
             }
             set 
             {
-                model.WindowFunc = value; 
+                model.WindowFunc = value;
+                Properties.Settings.Default.selectedFunc = WindowFunctions.IndexOf(value);
                 OnPropertyChanged("SelectedFunc"); 
             }
         }
