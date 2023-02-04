@@ -54,7 +54,7 @@
         </ListView>
         <ComboBox ItemsSource="{Binding WindowFunctions}" SelectedItem="{Binding SelectedFunc}" HorizontalAlignment="Left" Margin="98,231,0,0" VerticalAlignment="Top" Width="120" Height="26">
             <ComboBox.ToolTip>
-                <TextBox Width="250" TextWrapping="Wrap" Text="{Binding SelectedFunc.Description, Mode=OneWay}"/>
+                <TextBlock Width="250" TextWrapping="Wrap" Text="{Binding SelectedFunc.Description, Mode=OneWay}"/>
             </ComboBox.ToolTip>
         </ComboBox>
     </Grid>

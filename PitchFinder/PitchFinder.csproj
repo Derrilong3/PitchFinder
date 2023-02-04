@@ -11,7 +11,7 @@
     <PackageReference Include="Dirkster.AvalonDock" Version="4.71.1" />
     <PackageReference Include="FftSharp" Version="1.1.6" />
     <PackageReference Include="NAudio" Version="2.0.1" />
-    <PackageReference Include="OxyPlot.Wpf" Version="2.1.0" />
+    <PackageReference Include="OxyPlot.Wpf" Version="2.1.2" />
     <PackageReference Include="SoundTouch.Net" Version="2.3.2" />
   </ItemGroup>
 

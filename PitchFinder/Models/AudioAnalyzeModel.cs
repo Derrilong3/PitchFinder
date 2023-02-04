@@ -32,6 +32,8 @@ namespace PitchFinder.Models
             audioPlayback.BufferEventArgs += audioGraph_Buffer;
             plotModel = new PlotModel();
             plotModel.Series.Add(new LineSeries());
+            plotModel.Axes.Add(new OxyPlot.Axes.LinearAxis() { Position = OxyPlot.Axes.AxisPosition.Bottom, Maximum = 2000 });
+            plotModel.Axes.Add(new OxyPlot.Axes.LinearAxis() { Position = OxyPlot.Axes.AxisPosition.Left, Maximum = 0.05f });
 
             ColorMulti = new ObservableCollection<NoteBox>();
 
