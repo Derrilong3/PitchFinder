@@ -3,7 +3,6 @@ using OxyPlot;
 using OxyPlot.Series;
 using PitchFinder.ViewModels;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -22,6 +21,7 @@ namespace PitchFinder.Models
         private float singleFrequency;
         private string singleNote;
         private bool timered;
+        private Chromagram chromagram;
 
         public ObservableCollection<NoteBox> ColorMulti { get; private set; }
         public ObservableCollection<FftSharp.IWindow> WindowFunctions { get; private set; }
@@ -36,6 +36,7 @@ namespace PitchFinder.Models
             plotModel.Axes.Add(new OxyPlot.Axes.LinearAxis() { Position = OxyPlot.Axes.AxisPosition.Left, Maximum = 0.05f });
 
             ColorMulti = new ObservableCollection<NoteBox>();
+            chromagram = new Chromagram();
 
             for (int i = 0; i < 12; i++)
             {
@@ -44,7 +45,7 @@ namespace PitchFinder.Models
 
             WindowFunctions = new ObservableCollection<FftSharp.IWindow>();
 
-            foreach(FftSharp.IWindow window in FftSharp.Window.GetWindows())
+            foreach (FftSharp.IWindow window in FftSharp.Window.GetWindows())
             {
                 WindowFunctions.Add(window);
             }
@@ -106,24 +107,17 @@ namespace PitchFinder.Models
                     double[] fftMag = FftSharp.Transform.FFTmagnitude(paddedAudio);
                     double[] freq = FftSharp.Transform.FFTfreq(audioPlayback.SampleRate, fftMag.Length);
 
-                    List<Tuple<double, double>> list = new List<Tuple<double, double>>();
                     for (int i = 0; i < freq.Length; i++)
                     {
-                        list.Add(new(freq[i], fftMag[i]));
                         s.Points.Add(new DataPoint(freq[i], fftMag[i]));
                     }
 
-                    double[] c = audioPlayback.GetNotesMulti(list, 7);
-
-                    App.Current.Dispatcher.Invoke((System.Action)delegate
+                    var chroma = chromagram.GetChroma(fftMag);
+                    for (int i = 0; i < ColorMulti.Count; i++)
                     {
-                        for (int i = 0; i < ColorMulti.Count; i++)
-                        {
-                            double raw_G = 255 * c[i] * 12d;
-                            byte G = raw_G > 255 ? (byte)255 : (byte)raw_G;
-                            ColorMulti[i].Color = Color.FromRgb(0, G, 0);
-                        }
-                    });
+                        byte G = (byte)(255 * chroma[i]);
+                        ColorMulti[i].Color = Color.FromRgb(0, G, 0);
+                    }
 
                     //find the frequency peak
                     int peakIndex = 0;
@@ -209,6 +203,7 @@ namespace PitchFinder.Models
                 audioPlayback.Load(InputPath);
                 lastPlayed = InputPath;
                 AudioValues = new double[audioPlayback.SampleRate / 10];
+                chromagram.Initialize(audioPlayback.SampleRate);
             }
             audioPlayback.Play();
             timer.Start();
