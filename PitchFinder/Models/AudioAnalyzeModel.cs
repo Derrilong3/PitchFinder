@@ -70,7 +70,7 @@ namespace PitchFinder.Models
             s.Points.Clear();
 
             double[] windowed = WindowFunc.Apply(AudioValues);
-            double[] paddedAudio = FftSharp.Pad.ZeroPad(AudioValues);
+            double[] paddedAudio = FftSharp.Pad.ZeroPad(windowed);
             double[] fftMag = FftSharp.Transform.FFTmagnitude(paddedAudio);
             double[] freq = FftSharp.Transform.FFTfreq(audioPlayback.SampleRate, fftMag.Length);
 
