@@ -19,6 +19,8 @@ namespace PitchFinder.ViewModels
             _model= new GraphModel();
         }
 
+        public GraphModel Model { get { return _model; } }
+
         public PlotModel PlotModel
         {
             get => _model.PlotModel;
@@ -27,16 +29,6 @@ namespace PitchFinder.ViewModels
         public ObservableCollection<NoteBox> ColorMulti
         {
             get => _model.ColorMulti;
-        }
-
-        public float SingleFrequency
-        {
-            get => _model.SingleFrequency;
-        }
-
-        public string SingleNote
-        {
-            get => _model.SingleNote;
         }
     }
 }

@@ -4,9 +4,15 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:PitchFinder.Views"
+             xmlns:vm="clr-namespace:PitchFinder.ViewModels"
              xmlns:oxy="clr-namespace:OxyPlot.Wpf;assembly=OxyPlot.Wpf"
              mc:Ignorable="d" 
              d:DesignHeight="500" d:DesignWidth="800">
+
+    <UserControl.DataContext>
+        <vm:PlotViewModel/>
+    </UserControl.DataContext>
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="127*"/>
@@ -20,8 +26,8 @@
             </ComboBox.ToolTip>
         </ComboBox>-->
         <Label Content="Peak Frequency:" Margin="0,10,173,0" VerticalAlignment="Top" Height="26" Width="103" HorizontalAlignment="Right" />
-        <TextBox IsReadOnly="True" HorizontalAlignment="Right" Height="26" Margin="0,10,89,0" TextWrapping="Wrap" Text="{Binding SingleFrequency, Mode=OneWay}" VerticalAlignment="Top" Width="60" TextAlignment="Center"/>
-        <TextBox IsReadOnly="True" Height="26" Margin="0,10,24,0" TextWrapping="Wrap" Text="{Binding SingleNote, Mode=OneWay}" Width="60" TextAlignment="Center" FontSize="20" VerticalAlignment="Top" HorizontalAlignment="Right" />
+        <TextBox IsReadOnly="True" HorizontalAlignment="Right" Height="26" Margin="0,10,89,0" TextWrapping="Wrap" Text="{Binding Model.SingleFrequency, Mode=OneWay}" VerticalAlignment="Top" Width="60" TextAlignment="Center"/>
+        <TextBox IsReadOnly="True" Height="26" Margin="0,10,24,0" TextWrapping="Wrap" Text="{Binding Model.SingleNote, Mode=OneWay}" Width="60" TextAlignment="Center" FontSize="20" VerticalAlignment="Top" HorizontalAlignment="Right" />
         <ListView ItemsSource="{Binding ColorMulti}" Margin="0,41,0,0" VerticalAlignment="Bottom" Height="56" HorizontalAlignment="Center" Width="706">
             <ListView.ItemsPanel>
                 <ItemsPanelTemplate>

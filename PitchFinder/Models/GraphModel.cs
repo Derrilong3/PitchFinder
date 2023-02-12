@@ -1,13 +1,11 @@
-﻿using PitchFinder.ViewModels;
-using CommunityToolkit.Mvvm.Messaging;
+﻿using CommunityToolkit.Mvvm.Messaging;
 using OxyPlot;
 using OxyPlot.Series;
+using PitchFinder.ViewModels;
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Media;
-using CommunityToolkit.Mvvm.Messaging.Messages;
-using Microsoft.VisualBasic.ApplicationServices;
-using System;
 
 namespace PitchFinder.Models
 {
@@ -18,6 +16,7 @@ namespace PitchFinder.Models
         private float singleFrequency;
         private string singleNote;
         private Chromagram chromagram;
+        private int sampleRate;
 
         public ObservableCollection<NoteBox> ColorMulti { get; private set; }
 
@@ -74,17 +73,18 @@ namespace PitchFinder.Models
             }
         }
 
-        private void Init(int sampleRate)
+        private void Init()
         {
             chromagram.Initialize(sampleRate);
-            //plotModel.Series.Clear();
-            //plotModel.Series.Add(new LineSeries());
-            //plotModel.InvalidatePlot(true);
+            plotModel.Series.Clear();
+            plotModel.Series.Add(new LineSeries());
+            plotModel.InvalidatePlot(true);
         }
 
         public void SampleRateUpdated(object obj, Messages.SampleRateChangedMessage message)
         {
-            Init(message.Value);
+            sampleRate = message.Value;
+            Init();
         }
 
         public void FFTUpdated(object obj, Messages.FFTChangedMessage message)
@@ -112,18 +112,18 @@ namespace PitchFinder.Models
                 ColorMulti[i].Color = Color.FromRgb(0, G, 0);
             }
 
-            ////find the frequency peak
-            //int peakIndex = 0;
-            //for (int i = 0; i < message.Value.Length; i++)
-            //{
-            //    if (message.Value[i] > message.Value[peakIndex])
-            //        peakIndex = i;
-            //}
-            //double fftPeriod = FftSharp.Transform.FFTfreqPeriod(audioPlayback.SampleRate, fftMag.Length);
-            //float peakFrequency = (float)Math.Round((fftPeriod * peakIndex) * 100f) / 100f;
+            //find the frequency peak
+            int peakIndex = 0;
+            for (int i = 0; i < message.Value.Y.Length; i++)
+            {
+                if (message.Value.Y[i] > message.Value.Y[peakIndex])
+                    peakIndex = i;
+            }
+            double fftPeriod = FftSharp.Transform.FFTfreqPeriod(sampleRate, message.Value.Y.Length);
+            float peakFrequency = (float)Math.Round((fftPeriod * peakIndex) * 100f) / 100f;
 
-            //SingleFrequency = peakFrequency;
-            //SingleNote = audioPlayback.GetNote(peakFrequency);
+            SingleFrequency = peakFrequency;
+            SingleNote = ColorMulti.MaxBy(x => x.Color.G).Text;
             PlotModel.InvalidatePlot(true);
         }
     }
