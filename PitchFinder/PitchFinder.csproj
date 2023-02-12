@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.1.0" />
     <PackageReference Include="Dirkster.AvalonDock" Version="4.71.1" />
     <PackageReference Include="FftSharp" Version="1.1.6" />
     <PackageReference Include="NAudio" Version="2.0.1" />

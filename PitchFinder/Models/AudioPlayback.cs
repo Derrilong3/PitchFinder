@@ -14,7 +14,7 @@ namespace PitchFinder.Models
         public int SampleRate { get; set; }
 
 
-        public Dictionary<string, float> noteBaseFreqs = new Dictionary<string, float>()
+        public static Dictionary<string, float> noteBaseFreqs = new Dictionary<string, float>()
             {
                 { "C", 16.35f },
                 { "C#", 17.32f },

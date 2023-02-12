@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using PitchFinder.Models;
+using System.Collections.Generic;
 
 namespace PitchFinder.ViewModels
 {
@@ -11,7 +12,7 @@ namespace PitchFinder.ViewModels
         {
             Anchorables = new List<ToolViewModel>()
             {
-                new MediaPlaybackViewModel()
+                new PlotViewModel()
             };
 
             MenuViewModel = new MenuViewModel(Anchorables);

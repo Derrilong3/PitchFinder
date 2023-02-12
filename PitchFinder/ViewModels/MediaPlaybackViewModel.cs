@@ -20,8 +20,7 @@ namespace PitchFinder.ViewModels
         private AudioAnalyzeModel model;
 
         public RelayCommand LoadCommand { get; }
-        public RelayCommand PlayCommand { get; }
-        public RelayCommand PauseCommand { get; }
+        public RelayCommand PlayPauseCommand { get; }
         public RelayCommand StopCommand { get; }
 
         public MediaPlaybackViewModel() : base("Media Window")
@@ -32,8 +31,7 @@ namespace PitchFinder.ViewModels
             model.PropertyChanged += (s, e) => OnPropertyChanged(e.PropertyName);
             inputPathHistory = new ObservableCollection<string>();
             LoadCommand = new RelayCommand(Load, () => model.IsStopped);
-            PlayCommand = new RelayCommand(Play, () => !model.IsPlaying);
-            PauseCommand = new RelayCommand(Pause, () => model.IsPlaying);
+            PlayPauseCommand = new RelayCommand(PlayPauseInvoke);
             StopCommand = new RelayCommand(Stop, () => !model.IsStopped);
             timer.Interval = TimeSpan.FromMilliseconds(10);
             timer.Tick += TimerOnTick;
@@ -46,15 +44,12 @@ namespace PitchFinder.ViewModels
             {
                 SliderPosition = 0;
                 TimePosition = new TimeSpan(0, 0, 0).ToString("mm\\:ss");
-                //reader.Position = 0;
                 timer.Stop();
             }
             if (stoppedEventArgs.Exception != null)
             {
                 MessageBox.Show(stoppedEventArgs.Exception.Message, "Error Playing File");
             }
-            //OnPropertyChanged("IsPlaying");
-            //OnPropertyChanged("IsStopped");
         }
 
         private void TimerOnTick(object sender, EventArgs eventArgs)
@@ -67,14 +62,9 @@ namespace PitchFinder.ViewModels
             }
         }
 
-        public PlotModel PlotModel
+        public bool IsPlaying
         {
-            get => model.PlotModel;
-        }
-
-        public ObservableCollection<NoteBox> ColorMulti
-        {
-            get => model.ColorMulti;
+            get => model.IsPlaying;
         }
 
         public ObservableCollection<FftSharp.IWindow> WindowFunctions
@@ -88,22 +78,12 @@ namespace PitchFinder.ViewModels
             {
                 return model.WindowFunc;
             }
-            set 
+            set
             {
                 model.WindowFunc = value;
                 Properties.Settings.Default.selectedFunc = WindowFunctions.IndexOf(value);
-                OnPropertyChanged("SelectedFunc"); 
+                OnPropertyChanged("SelectedFunc");
             }
-        }
-
-        public float SingleFrequency
-        {
-            get => model.SingleFrequency;
-        }
-
-        public string SingleNote
-        {
-            get => model.SingleNote;
         }
 
         public string TimePosition
@@ -117,7 +97,7 @@ namespace PitchFinder.ViewModels
                 timerPosition = value;
                 OnPropertyChanged("TimePosition");
             }
-        }
+        } 
 
         public double SliderPosition
         {
@@ -194,6 +174,16 @@ namespace PitchFinder.ViewModels
             }
         }
 
+        private void PlayPauseInvoke()
+        {
+            if (IsPlaying)
+                Pause();
+            else
+                Play();
+
+            OnPropertyChanged("IsPlaying");
+        }
+        
         private void Play()
         {
             if (string.IsNullOrEmpty(InputPath))

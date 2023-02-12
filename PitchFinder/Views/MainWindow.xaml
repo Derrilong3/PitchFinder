@@ -5,8 +5,9 @@
         xmlns:dock="https://github.com/Dirkster99/AvalonDock" 
         xmlns:v="clr-namespace:PitchFinder.Views"
         xmlns:m="clr-namespace:PitchFinder.Models"
+        xmlns:conv="clr-namespace:PitchFinder.Converters"
         xmlns:sys="clr-namespace:System;assembly=System.Runtime"
-        Title="WPF App" Height="700" Width="1000">
+        Title="WPF App" Height="600" Width="800" MinHeight="600" MinWidth="800">
 
     <Window.DataContext>
         <local:MainViewModel/>
@@ -15,34 +16,40 @@
     <Window.Resources>
         <sys:Boolean x:Key="TRUE">True</sys:Boolean>
         <sys:Boolean x:Key="FALSE">False</sys:Boolean>
-        <m:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
-        <DataTemplate DataType="{x:Type local:MediaPlaybackViewModel}">
-            <v:MediaFoundationPlaybackView/>
+        <conv:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+        <DataTemplate DataType="{x:Type local:PlotViewModel}">
+            <v:PlotView/>
         </DataTemplate>
     </Window.Resources>
-    
+
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition/>
         </Grid.RowDefinitions>
 
-        <Menu Grid.Row="0" DataContext="{Binding MenuViewModel}" ItemsSource="{Binding Items}">
+        <Menu Grid.Row="0" DataContext="{Binding MenuViewModel}" ItemsSource="{Binding Items}" Background="White">
             <Menu.Resources>
                 <Style TargetType="{x:Type MenuItem}" BasedOn="{StaticResource {x:Type MenuItem}}">
                     <Setter Property="Command" Value="{Binding Command}" />
                     <Setter Property="Header" Value="{Binding Header}" />
                     <Setter Property="IsCheckable" Value="{Binding IsCheckable}" />
                     <Setter Property="IsChecked" Value="{Binding IsChecked}" />
+                    <Setter Property="Height" Value="20" />
                 </Style>
                 <HierarchicalDataTemplate DataType="{x:Type local:MenuItemViewModel}" ItemsSource="{Binding Items}" />
             </Menu.Resources>
         </Menu>
 
-        <dock:DockingManager x:Name="dockManager" Grid.Row="1"
+        <ToolBarTray SnapsToDevicePixels="True" Grid.Row="1" Background="#FFF0F0F0">
+            <v:MediaPlaybackToolBar/>
+        </ToolBarTray>
+
+        <dock:DockingManager x:Name="dockManager" Grid.Row="2"
                          AnchorablesSource="{Binding Anchorables}">
 
-                <dock:DockingManager.LayoutItemContainerStyle>
+            <dock:DockingManager.LayoutItemContainerStyle>
                 <Style TargetType="{x:Type LayoutAnchorableItem}">
                     <Setter Property="Title" Value="{Binding Model.Title}" />
                     <Setter Property="ContentId" Value="{Binding Model.ContentId}" />
