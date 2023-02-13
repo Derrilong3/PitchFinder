@@ -1,6 +1,4 @@
-﻿using FftSharp;
-using NAudio.Wave;
-using OxyPlot;
+﻿using NAudio.Wave;
 using PitchFinder.Models;
 using System;
 using System.Collections.ObjectModel;
@@ -98,7 +96,7 @@ namespace PitchFinder.ViewModels
                 timerPosition = value;
                 OnPropertyChanged("TimePosition");
             }
-        } 
+        }
 
         public double SliderPosition
         {
@@ -184,7 +182,7 @@ namespace PitchFinder.ViewModels
 
             OnPropertyChanged("IsPlaying");
         }
-        
+
         private void Play()
         {
             if (string.IsNullOrEmpty(InputPath))

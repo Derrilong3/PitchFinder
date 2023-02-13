@@ -1,16 +1,13 @@
-﻿using System.Windows;
+﻿using PitchFinder.ViewModels;
 using System;
 using System.ComponentModel;
 using System.IO;
 using System.Reflection;
 using System.Runtime.Versioning;
-using PitchFinder.ViewModels;
+using System.Windows;
 
 namespace PitchFinder.Views
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
         public MainWindow()

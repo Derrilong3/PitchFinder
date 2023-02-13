@@ -11,7 +11,7 @@ namespace PitchFinder.Models
     {
         private string lastPlayed;
         private double[] AudioValues;
-        private AudioPlayback audioPlayback;     
+        private AudioPlayback audioPlayback;
         private readonly System.Timers.Timer timer;
         private bool timered;
 

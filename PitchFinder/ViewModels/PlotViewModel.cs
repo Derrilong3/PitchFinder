@@ -1,11 +1,6 @@
 ﻿using OxyPlot;
 using PitchFinder.Models;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PitchFinder.ViewModels
 {
@@ -16,7 +11,7 @@ namespace PitchFinder.ViewModels
         public PlotViewModel() : base("Plot Window")
         {
             ContentId = "PlotTool";
-            _model= new GraphModel();
+            _model = new GraphModel();
         }
 
         public GraphModel Model { get { return _model; } }

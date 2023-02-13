@@ -8,7 +8,7 @@
 
         public ToolViewModel(string name)
         {
-            Title = name; 
+            Title = name;
         }
 
         public string Title

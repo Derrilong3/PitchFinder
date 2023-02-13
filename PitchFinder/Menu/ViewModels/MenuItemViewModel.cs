@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using PitchFinder.ViewModels;
+using System.Collections.Generic;
 using System.Windows.Input;
-using PitchFinder.ViewModels;
 
 namespace PitchFinder.Menu
 {

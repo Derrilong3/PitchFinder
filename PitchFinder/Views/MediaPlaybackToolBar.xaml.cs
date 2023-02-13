@@ -3,9 +3,6 @@ using System.Windows.Controls;
 
 namespace PitchFinder.Views
 {
-    /// <summary>
-    /// Логика взаимодействия для MediaPlaybackView.xaml
-    /// </summary>
     public partial class MediaPlaybackToolBar : ToolBar
     {
         public MediaPlaybackToolBar()

@@ -1,8 +1,6 @@
-﻿
-using NAudio.Wave;
+﻿using NAudio.Wave;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Windows;
 
 namespace PitchFinder.Models

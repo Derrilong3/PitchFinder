@@ -1,5 +1,4 @@
-﻿using PitchFinder.Models;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace PitchFinder.ViewModels
 {
