@@ -66,25 +66,6 @@ namespace PitchFinder.ViewModels
             get => model.IsPlaying;
         }
 
-        public ObservableCollection<FftSharp.IWindow> WindowFunctions
-        {
-            get => model.WindowFunctions;
-        }
-
-        public FftSharp.IWindow SelectedFunc
-        {
-            get
-            {
-                return model.WindowFunc;
-            }
-            set
-            {
-                model.WindowFunc = value;
-                Properties.Settings.Default.selectedFunc = WindowFunctions.IndexOf(value);
-                OnPropertyChanged("SelectedFunc");
-            }
-        }
-
         public string TimePosition
         {
             get => timerPosition;

@@ -37,6 +37,7 @@
                     <Setter Property="IsCheckable" Value="{Binding IsCheckable}" />
                     <Setter Property="IsChecked" Value="{Binding IsChecked}" />
                     <Setter Property="Height" Value="20" />
+                    <Setter Property="Foreground" Value="Black" />
                 </Style>
                 <HierarchicalDataTemplate DataType="{x:Type menu:MenuItemViewModel}" ItemsSource="{Binding Items}" />
             </Menu.Resources>

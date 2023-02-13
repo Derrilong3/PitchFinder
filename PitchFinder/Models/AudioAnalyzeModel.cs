@@ -1,8 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
+using FftSharp;
 using NAudio.Wave;
 using PitchFinder.ViewModels;
 using System;
-using System.Collections.ObjectModel;
 using System.Timers;
 
 namespace PitchFinder.Models
@@ -14,29 +14,28 @@ namespace PitchFinder.Models
         private AudioPlayback audioPlayback;
         private readonly System.Timers.Timer timer;
         private bool timered;
-
-        public ObservableCollection<FftSharp.IWindow> WindowFunctions { get; private set; }
+        public FftSharp.IWindow _windowFunc;
 
         public AudioAnalyzeModel()
         {
             audioPlayback = new AudioPlayback();
             audioPlayback.BufferEventArgs += audioGraph_Buffer;
 
-            WindowFunctions = new ObservableCollection<FftSharp.IWindow>();
-
-            foreach (FftSharp.IWindow window in FftSharp.Window.GetWindows())
-            {
-                WindowFunctions.Add(window);
-            }
-
-            WindowFunc = WindowFunctions[Properties.Settings.Default.selectedFunc];
+            _windowFunc = Window.GetWindows()[Properties.Settings.Default.selectedFunc];
 
             timer = new Timer(10);
             timer.Elapsed += TimerOnElapsed;
             timer.AutoReset = true;
+
+            WeakReferenceMessenger.Default.Register<Messages.WindowFuncChangedMessage>(this, WindowChanged);
         }
 
         public event EventHandler<StoppedEventArgs> PlaybackStopped;
+
+        public void WindowChanged(object obj, Messages.WindowFuncChangedMessage message)
+        {
+            _windowFunc = Window.GetWindows()[message.Value];
+        }
 
         private void TimerOnElapsed(object sender, ElapsedEventArgs e)
         {
@@ -45,7 +44,7 @@ namespace PitchFinder.Models
                 return;
             }
 
-            double[] windowed = WindowFunc.Apply(AudioValues);
+            double[] windowed = _windowFunc.Apply(AudioValues);
             double[] paddedAudio = FftSharp.Pad.ZeroPad(windowed);
 
             Messages.FFTData fft = new Messages.FFTData();
@@ -97,11 +96,6 @@ namespace PitchFinder.Models
         public bool IsStopped => audioPlayback.PlaybackDevice == null || audioPlayback.PlaybackDevice.PlaybackState == PlaybackState.Stopped;
 
         public WaveStream FileStream { get => audioPlayback.FileStream; }
-
-        public FftSharp.IWindow WindowFunc
-        {
-            get; set;
-        }
 
         public void Play()
         {

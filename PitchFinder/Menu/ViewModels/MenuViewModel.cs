@@ -12,7 +12,8 @@ namespace PitchFinder.ViewModels
         {
             Items = new List<MenuItemViewModel>
             {
-                new ToolsMenu(dockWindows)
+                new ToolsMenu(dockWindows),
+                new WindowFuncMenu()
             };
         }
     }

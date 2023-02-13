@@ -19,7 +19,14 @@ namespace PitchFinder.Models
 
         public class SampleRateChangedMessage : ValueChangedMessage<int>
         {
-            public SampleRateChangedMessage(in int sampleRate) : base(sampleRate)
+            public SampleRateChangedMessage(int sampleRate) : base(sampleRate)
+            {
+            }
+        }
+
+        public class WindowFuncChangedMessage : ValueChangedMessage<int>
+        {
+            public WindowFuncChangedMessage(int windowIndex) : base(windowIndex)
             {
             }
         }
