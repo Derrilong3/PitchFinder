@@ -3,7 +3,7 @@
     public abstract class ToolViewModel : ViewModelBase
     {
         private string _title;
-        private bool _isVisible = true;
+        private bool _isVisible = false;
         private string _contentId = null;
 
         public ToolViewModel(string name)

@@ -1,4 +1,5 @@
-﻿using NAudio.Wave;
+﻿using FftSharp;
+using NAudio.Wave;
 using OxyPlot;
 using PitchFinder.Models;
 using System;

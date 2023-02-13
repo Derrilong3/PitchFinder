@@ -1,31 +1,19 @@
-﻿using System.Collections.Generic;
+﻿using PitchFinder.ViewModels;
+using System.Collections.Generic;
 
-namespace PitchFinder.ViewModels
+namespace PitchFinder.Menu.MenuItems
 {
-    internal class MenuViewModel
+    internal class ToolsMenu : MenuItemViewModel
     {
-        public IEnumerable<MenuItemViewModel> Items { get; private set; }
-
-        private readonly MenuItemViewModel ViewMenuItemViewModel;
-
-        public MenuViewModel(IEnumerable<ToolViewModel> dockWindows)
+        public ToolsMenu(IEnumerable<ToolViewModel> dockWindows, string header = "Tools") : base(header)
         {
-            var view = this.ViewMenuItemViewModel = new MenuItemViewModel() { Header = "Tools" };
-
             foreach (var dockWindow in dockWindows)
-                view.Items.Add(GetMenuItemViewModel(dockWindow));
-
-            var items = new List<MenuItemViewModel>();
-            items.Add(view);
-            this.Items = items;
+                Items.Add(GetMenuItemViewModel(dockWindow));
         }
 
         private MenuItemViewModel GetMenuItemViewModel(ToolViewModel dockWindowViewModel)
         {
-            var menuItemViewModel = new MenuItemViewModel();
-            menuItemViewModel.IsCheckable = true;
-
-            menuItemViewModel.Header = dockWindowViewModel.Title;
+            var menuItemViewModel = new MenuItemViewModel(dockWindowViewModel.Title, true);
             menuItemViewModel.IsChecked = dockWindowViewModel.IsVisible;
 
             dockWindowViewModel.PropertyChanged += (o, e) =>
