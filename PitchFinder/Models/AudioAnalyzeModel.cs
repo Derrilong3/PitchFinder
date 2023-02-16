@@ -9,23 +9,26 @@ namespace PitchFinder.Models
 {
     internal class AudioAnalyzeModel : ViewModelBase, IDisposable
     {
-        private string lastPlayed;
-        private double[] AudioValues;
-        private AudioPlayback audioPlayback;
-        private readonly System.Timers.Timer timer;
-        private bool timered;
-        public FftSharp.IWindow _windowFunc;
+        private string _lastPlayed;
+        private double[] _audioValues;
+        private readonly Timer _timer;
+        private bool _timered;
+        private FftSharp.IWindow _windowFunc;
+
+        public IWavePlayer PlaybackDevice { get; set; }
+        public WaveStream FileStream { get; set; }
+        public int SampleRate { get; set; }
+        public string InputPath { get; set; }
+        public bool IsPlaying => PlaybackDevice != null && PlaybackDevice.PlaybackState == PlaybackState.Playing;
+        public bool IsStopped => PlaybackDevice == null || PlaybackDevice.PlaybackState == PlaybackState.Stopped;
 
         public AudioAnalyzeModel()
         {
-            audioPlayback = new AudioPlayback();
-            audioPlayback.BufferEventArgs += audioGraph_Buffer;
-
             _windowFunc = Window.GetWindows()[Properties.Settings.Default.selectedFunc];
 
-            timer = new Timer(10);
-            timer.Elapsed += TimerOnElapsed;
-            timer.AutoReset = true;
+            _timer = new Timer(50);
+            _timer.Elapsed += TimerOnElapsed;
+            _timer.AutoReset = true;
 
             WeakReferenceMessenger.Default.Register<Messages.WindowFuncChangedMessage>(this, WindowChanged);
         }
@@ -39,121 +42,165 @@ namespace PitchFinder.Models
 
         private void TimerOnElapsed(object sender, ElapsedEventArgs e)
         {
-            if (!timered)
+            if (!_timered)
             {
                 return;
             }
 
-            double[] windowed = _windowFunc.Apply(AudioValues);
+            double[] windowed = _windowFunc.Apply(_audioValues);
             double[] paddedAudio = FftSharp.Pad.ZeroPad(windowed);
 
             Messages.FFTData fft = new Messages.FFTData();
             fft.Y = FftSharp.Transform.FFTmagnitude(paddedAudio);
-            fft.X = FftSharp.Transform.FFTfreq(audioPlayback.SampleRate, fft.Y.Length);
+            fft.X = FftSharp.Transform.FFTfreq(SampleRate, fft.Y.Length);
 
             WeakReferenceMessenger.Default.Send(new Messages.FFTChangedMessage(fft));
-            timered = false;
+            _timered = false;
         }
 
         void audioGraph_Buffer(object sender, BufferEventArgs e)
         {
-            int bytesPerSamplePerChannel = audioPlayback.FileStream.WaveFormat.BitsPerSample / 8;
-            int bytesPerSample = bytesPerSamplePerChannel * audioPlayback.FileStream.WaveFormat.Channels;
+            int bytesPerSamplePerChannel = FileStream.WaveFormat.BitsPerSample / 8;
+            int bytesPerSample = bytesPerSamplePerChannel * FileStream.WaveFormat.Channels;
             int bufferSampleCount = e.Buffer.Length / bytesPerSample;
 
-            if (bufferSampleCount >= AudioValues.Length)
+            if (bufferSampleCount >= _audioValues.Length)
             {
-                bufferSampleCount = AudioValues.Length;
+                bufferSampleCount = _audioValues.Length;
             }
 
-            if (bytesPerSamplePerChannel == 2 && audioPlayback.FileStream.WaveFormat.Encoding == WaveFormatEncoding.Pcm)
+            if (bytesPerSamplePerChannel == 2 && FileStream.WaveFormat.Encoding == WaveFormatEncoding.Pcm)
             {
                 for (int i = 0; i < bufferSampleCount; i++)
-                    AudioValues[i] = BitConverter.ToInt16(e.Buffer, i * bytesPerSample);
+                    _audioValues[i] = BitConverter.ToInt16(e.Buffer, i * bytesPerSample);
             }
-            else if (bytesPerSamplePerChannel == 4 && audioPlayback.FileStream.WaveFormat.Encoding == WaveFormatEncoding.Pcm)
+            else if (bytesPerSamplePerChannel == 4 && FileStream.WaveFormat.Encoding == WaveFormatEncoding.Pcm)
             {
                 for (int i = 0; i < bufferSampleCount; i++)
-                    AudioValues[i] = BitConverter.ToInt32(e.Buffer, i * bytesPerSample);
+                    _audioValues[i] = BitConverter.ToInt32(e.Buffer, i * bytesPerSample);
             }
-            else if (bytesPerSamplePerChannel == 4 && audioPlayback.FileStream.WaveFormat.Encoding == WaveFormatEncoding.IeeeFloat)
+            else if (bytesPerSamplePerChannel == 4 && FileStream.WaveFormat.Encoding == WaveFormatEncoding.IeeeFloat)
             {
                 for (int i = 0; i < bufferSampleCount; i++)
-                    AudioValues[i] = BitConverter.ToSingle(e.Buffer, i * bytesPerSample);
+                    _audioValues[i] = BitConverter.ToSingle(e.Buffer, i * bytesPerSample);
             }
             else
             {
-                throw new NotSupportedException(audioPlayback.FileStream.WaveFormat.ToString());
+                throw new NotSupportedException(FileStream.WaveFormat.ToString());
             }
 
-            timered = true;
+            _timered = true;
         }
 
-        public string InputPath { get; set; }
+        public void Load(string fileName)
+        {
+            Stop();
+            CloseFile();
+            EnsureDeviceCreated();
+            OpenFile(fileName);
+        }
 
-        public bool IsPlaying => audioPlayback.PlaybackDevice != null && audioPlayback.PlaybackDevice.PlaybackState == PlaybackState.Playing;
+        public void CloseFile()
+        {
+            FileStream?.Dispose();
+            FileStream = null;
+        }
 
-        public bool IsStopped => audioPlayback.PlaybackDevice == null || audioPlayback.PlaybackDevice.PlaybackState == PlaybackState.Stopped;
+        private void OpenFile(string fileName)
+        {
+            try
+            {
+                var inputStream = new AudioFileReader(fileName);
+                FileStream = inputStream;
+                var aggregator = new SampleAggregator(inputStream);
+                SampleRate = inputStream.WaveFormat.SampleRate;
+                aggregator.BufferEventArgs += audioGraph_Buffer;
+                PlaybackDevice.Init(aggregator);
+            }
+            catch (Exception e)
+            {
+                System.Windows.MessageBox.Show(e.Message, "Problem opening file");
+                CloseFile();
+            }
+        }
 
-        public WaveStream FileStream { get => audioPlayback.FileStream; }
+        private void EnsureDeviceCreated()
+        {
+            if (PlaybackDevice == null)
+            {
+                CreateDevice();
+            }
+        }
+
+        public void CreateDevice()
+        {
+            PlaybackDevice = new WaveOut { DesiredLatency = 150 };
+        }
 
         public void Play()
         {
-
-            if (audioPlayback.PlaybackDevice == null)
+            if (PlaybackDevice == null)
             {
                 CreatePlayer();
             }
-            if (lastPlayed != InputPath && audioPlayback.FileStream != null)
+            if (_lastPlayed != InputPath && FileStream != null)
             {
-                audioPlayback.CloseFile();
+                CloseFile();
             }
-            if (audioPlayback.FileStream == null)
+            if (FileStream == null)
             {
-                audioPlayback.Load(InputPath);
-                lastPlayed = InputPath;
-                AudioValues = new double[audioPlayback.SampleRate / 10];
-                WeakReferenceMessenger.Default.Send(new Messages.SampleRateChangedMessage(audioPlayback.SampleRate));
+                Load(InputPath);
+                _lastPlayed = InputPath;
+                _audioValues = new double[SampleRate / 10];
+                WeakReferenceMessenger.Default.Send(new Messages.SampleRateChangedMessage(SampleRate));
             }
-            audioPlayback.Play();
-            timer.Start();
+
+            PlaybackDevice.Play();
+            _timer.Start();
         }
 
         private void CreatePlayer()
         {
-            audioPlayback.CreateDevice();
-            audioPlayback.PlaybackDevice.PlaybackStopped += PlaybackStopped;
+            CreateDevice();
+            PlaybackDevice.PlaybackStopped += PlaybackStopped;
         }
 
         public void Stop()
         {
-            if (audioPlayback.PlaybackDevice != null)
+            if (PlaybackDevice != null)
             {
-                audioPlayback.Stop();
-                timer.Stop();
+                PlaybackDevice?.Stop();
+                if (FileStream != null)
+                {
+                    FileStream.Position = 0;
+                }
+                _timer.Stop();
             }
         }
 
         public void Pause()
         {
-            if (audioPlayback.PlaybackDevice != null)
+            if (PlaybackDevice != null)
             {
-                audioPlayback.Pause();
-                timer.Stop();
+                PlaybackDevice.Pause();
+                _timer.Stop();
             }
         }
 
         public void Load()
         {
-            if (audioPlayback.FileStream != null)
+            if (FileStream != null)
             {
-                audioPlayback.CloseFile();
+                CloseFile();
             }
         }
 
         public void Dispose()
         {
-            audioPlayback.Dispose();
+            Stop();
+            CloseFile();
+            PlaybackDevice?.Dispose();
+            PlaybackDevice = null;
         }
     }
 }
