@@ -31,7 +31,10 @@ namespace PitchFinder.Menu.MenuItems
                 menuItemViewModel.IsChecked = true;
 
                 SelectedFunc = menuItemViewModel;
-                WeakReferenceMessenger.Default.Send(new Models.Messages.WindowFuncChangedMessage(Items.IndexOf(SelectedFunc)));
+
+                int idx = Items.IndexOf(SelectedFunc);
+                Properties.Settings.Default.selectedFunc = idx;
+                WeakReferenceMessenger.Default.Send(new Models.Messages.WindowFuncChangedMessage(idx));
 
             }, () => menuItemViewModel.IsCheckable);
 

@@ -161,6 +161,7 @@ namespace PitchFinder.ViewModels
         private void Stop()
         {
             _audioHandler.Stop();
+            OnPropertyChanged("IsPlaying");
         }
 
         private void Pause()
