@@ -68,7 +68,7 @@ namespace PitchFinder.Models
         }
 
         //https://github.com/meyda/meyda/blob/main/src/utilities.ts#L192
-        private void CreateChromaFilterBank(int sampleRate, int numFilters = 12, int bufferSize = 8192, int centerOctave = 5, float octaveWidth = 2, bool baseC = true, float A440 = 440)
+        private void CreateChromaFilterBank(int sampleRate, int numFilters = 12, int bufferSize = 4096, int centerOctave = 5, float octaveWidth = 2, bool baseC = true, float A440 = 440)
         {
             int numOutputBins = (int)Math.Floor(bufferSize / 2f) + 1;
 

@@ -1,7 +1,6 @@
 ﻿using NAudio.Wave;
 using PitchFinder.Models;
 using System;
-using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Threading;
 using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
@@ -10,13 +9,14 @@ namespace PitchFinder.ViewModels
 {
     internal class MediaPlaybackViewModel : ToolViewModel, IDisposable
     {
-        private readonly ObservableCollection<string> inputPathHistory;
-        private readonly DispatcherTimer timer = new DispatcherTimer();
         const double SliderMax = 10.0;
         private string timerPosition;
         private string defaultDecompressionFormat;
         private double sliderPosition;
-        private AudioAnalyzeModel model;
+
+        private readonly DispatcherTimer timer = new DispatcherTimer();
+        private IAudioHandler _audioHandler;
+        private AudioAnalyzeModel _analyzeModel;
 
         public RelayCommand LoadCommand { get; }
         public RelayCommand PlayPauseCommand { get; }
@@ -25,13 +25,12 @@ namespace PitchFinder.ViewModels
         public MediaPlaybackViewModel() : base("Media Window")
         {
             ContentId = "MediaTool";
-            model = new AudioAnalyzeModel();
-            model.PlaybackStopped += WavePlayerOnPlaybackStopped;
-            model.PropertyChanged += (s, e) => OnPropertyChanged(e.PropertyName);
-            inputPathHistory = new ObservableCollection<string>();
-            LoadCommand = new RelayCommand(Load, () => model.IsStopped);
+            _audioHandler = new AudioFileHandler();
+            _audioHandler.PlaybackStopped += WavePlayerOnPlaybackStopped;
+            _analyzeModel = new AudioAnalyzeModel(_audioHandler);
+            LoadCommand = new RelayCommand(Load, () => _audioHandler.IsStopped);
             PlayPauseCommand = new RelayCommand(PlayPauseInvoke);
-            StopCommand = new RelayCommand(Stop, () => !model.IsStopped);
+            StopCommand = new RelayCommand(Stop, () => !_audioHandler.IsStopped);
             timer.Interval = TimeSpan.FromMilliseconds(10);
             timer.Tick += TimerOnTick;
             TimePosition = new TimeSpan(0, 0, 0).ToString("mm\\:ss");
@@ -39,12 +38,10 @@ namespace PitchFinder.ViewModels
 
         private void WavePlayerOnPlaybackStopped(object sender, StoppedEventArgs stoppedEventArgs)
         {
-            if (model.FileStream != null)
-            {
-                SliderPosition = 0;
-                TimePosition = new TimeSpan(0, 0, 0).ToString("mm\\:ss");
-                timer.Stop();
-            }
+            SliderPosition = 0;
+            TimePosition = new TimeSpan(0, 0, 0).ToString("mm\\:ss");
+            timer.Stop();
+
             if (stoppedEventArgs.Exception != null)
             {
                 MessageBox.Show(stoppedEventArgs.Exception.Message, "Error Playing File");
@@ -53,17 +50,14 @@ namespace PitchFinder.ViewModels
 
         private void TimerOnTick(object sender, EventArgs eventArgs)
         {
-            if (model.FileStream != null)
-            {
-                sliderPosition = Math.Min(SliderMax, model.FileStream.Position * SliderMax / model.FileStream.Length);
-                TimePosition = model.FileStream.CurrentTime.ToString("mm\\:ss");
-                OnPropertyChanged("SliderPosition");
-            }
+            sliderPosition = Math.Min(SliderMax, _audioHandler.Position * SliderMax / _audioHandler.Length);
+            TimePosition = _audioHandler.CurrentTime.ToString("mm\\:ss");
+            OnPropertyChanged("SliderPosition");
         }
 
         public bool IsPlaying
         {
-            get => model.IsPlaying;
+            get => _audioHandler.IsPlaying;
         }
 
         public string TimePosition
@@ -87,11 +81,8 @@ namespace PitchFinder.ViewModels
                 if (sliderPosition != value)
                 {
                     sliderPosition = value;
-                    if (model.FileStream != null)
-                    {
-                        var pos = (long)(model.FileStream.Length * sliderPosition / SliderMax);
-                        model.FileStream.Position = pos;
-                    }
+                    var pos = (long)(_audioHandler.Length * sliderPosition / SliderMax);
+                    _audioHandler.Position = pos;
                     OnPropertyChanged("SliderPosition");
                 }
             }
@@ -109,23 +100,14 @@ namespace PitchFinder.ViewModels
 
         public string InputPath
         {
-            get => model.InputPath;
+            get => _audioHandler.InputPath;
             set
             {
-                if (model.InputPath != value)
+                if (_audioHandler.InputPath != value)
                 {
-                    model.InputPath = value;
-                    AddToHistory(value);
+                    _audioHandler.InputPath = value;
                     OnPropertyChanged("InputPath");
                 }
-            }
-        }
-
-        private void AddToHistory(string value)
-        {
-            if (!inputPathHistory.Contains(value))
-            {
-                inputPathHistory.Add(value);
             }
         }
 
@@ -172,30 +154,30 @@ namespace PitchFinder.ViewModels
                 return;
             }
 
-            model.Play();
+            _audioHandler.Play();
             timer.Start();
         }
 
         private void Stop()
         {
-            model.Stop();
+            _audioHandler.Stop();
         }
 
         private void Pause()
         {
-            model.Pause();
+            _audioHandler.Pause();
             timer.Stop();
         }
 
         private void Load()
         {
-            model.Load();
+            _audioHandler.Load();
             SelectInputFile();
         }
 
         public void Dispose()
         {
-            model.Dispose();
+            _audioHandler.Dispose();
         }
 
     }
