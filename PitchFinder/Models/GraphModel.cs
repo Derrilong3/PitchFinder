@@ -9,7 +9,6 @@ using System.Windows.Media;
 
 namespace PitchFinder.Models
 {
-
     class GraphModel : ViewModelBase
     {
         private PlotModel plotModel;
@@ -17,6 +16,7 @@ namespace PitchFinder.Models
         private string singleNote;
         private Chromagram chromagram;
         private int sampleRate;
+        private string[] noteNames = { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" };
 
         public ObservableCollection<NoteBox> ColorMulti { get; private set; }
 
@@ -29,9 +29,9 @@ namespace PitchFinder.Models
             ColorMulti = new ObservableCollection<NoteBox>();
             chromagram = new Chromagram();
 
-            for (int i = 0; i < 12; i++)
+            for (int i = 0; i < noteNames.Length; i++)
             {
-                ColorMulti.Add(new NoteBox() { Text = AudioPlayback.noteBaseFreqs.ElementAt(i).Key, Color = Color.FromRgb(0, 0, 0) });
+                ColorMulti.Add(new NoteBox() { Text = noteNames[i], Color = Color.FromRgb(0, 0, 0) });
             }
 
             WeakReferenceMessenger.Default.Register<Messages.FFTChangedMessage>(this, FFTUpdated);
