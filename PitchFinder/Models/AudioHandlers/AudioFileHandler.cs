@@ -29,11 +29,7 @@ namespace PitchFinder.Models
 
         void audioGraph_Buffer(object sender, BufferEventArgs e)
         {
-            lock (_audioValues)
-            {
-                _reader.ReadSamples(e.Buffer, e.Buffer.Length, _audioValues);
-                _processEvt.Set();
-            }
+            ReadSamples(e.Buffer);
         }
 
         public void Load(string fileName)

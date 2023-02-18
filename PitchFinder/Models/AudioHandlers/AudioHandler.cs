@@ -34,11 +34,6 @@ namespace PitchFinder.Models
         public virtual event EventHandler<StoppedEventArgs> PlaybackStopped;
         public event EventHandler DataReceived;
 
-        protected void Subscribe(ref EventHandler<StoppedEventArgs> eventHandler)
-        {
-            eventHandler += PlaybackStopped;
-        }
-
         public AudioHandler()
         {
             _cts = new CancellationTokenSource();
@@ -60,6 +55,15 @@ namespace PitchFinder.Models
                     }
                     DataReceived?.Invoke(this, EventArgs.Empty);
                 }
+            }
+        }
+
+        protected void ReadSamples(byte[] buffer)
+        {
+            lock (_audioValues)
+            {
+                _reader.ReadSamples(buffer, buffer.Length, _audioValues);
+                _processEvt.Set();
             }
         }
 
