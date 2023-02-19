@@ -9,7 +9,6 @@ namespace PitchFinder.Models
         public int SampleRate { get; }
         public bool IsPlaying { get; }
         public bool IsStopped { get; }
-        public string InputPath { get; set; }
         public long Position { get; set; }
         public long Length { get; }
         public TimeSpan CurrentTime { get; }

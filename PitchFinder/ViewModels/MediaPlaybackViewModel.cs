@@ -3,7 +3,6 @@ using PitchFinder.Models;
 using System;
 using System.Windows;
 using System.Windows.Threading;
-using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
 
 namespace PitchFinder.ViewModels
 {
@@ -11,7 +10,6 @@ namespace PitchFinder.ViewModels
     {
         const double SliderMax = 10.0;
         private string timerPosition;
-        private string defaultDecompressionFormat;
         private double sliderPosition;
 
         private readonly DispatcherTimer timer = new DispatcherTimer();
@@ -88,53 +86,6 @@ namespace PitchFinder.ViewModels
             }
         }
 
-        public string DefaultDecompressionFormat
-        {
-            get => defaultDecompressionFormat;
-            set
-            {
-                defaultDecompressionFormat = value;
-                OnPropertyChanged("DefaultDecompressionFormat");
-            }
-        }
-
-        public string InputPath
-        {
-            get => _audioHandler.InputPath;
-            set
-            {
-                if (_audioHandler.InputPath != value)
-                {
-                    _audioHandler.InputPath = value;
-                    OnPropertyChanged("InputPath");
-                }
-            }
-        }
-
-        private void SelectInputFile()
-        {
-            var ofd = new OpenFileDialog();
-            if (ofd.ShowDialog() == true)
-            {
-                OpenInputFile(ofd.FileName);
-            }
-        }
-
-        private void OpenInputFile(string file)
-        {
-            try
-            {
-                using (var tempReader = new AudioFileReader(file))
-                {
-                    DefaultDecompressionFormat = tempReader.WaveFormat.ToString();
-                    InputPath = file;
-                }
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show($"Not a supported input file ({e.Message})");
-            }
-        }
 
         private void PlayPauseInvoke()
         {
@@ -148,14 +99,15 @@ namespace PitchFinder.ViewModels
 
         private void Play()
         {
-            if (string.IsNullOrEmpty(InputPath))
+            try
             {
-                MessageBox.Show("Select a valid input file or URL first");
-                return;
+                _audioHandler.Play();
+                timer.Start();
             }
-
-            _audioHandler.Play();
-            timer.Start();
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void Stop()
@@ -172,8 +124,14 @@ namespace PitchFinder.ViewModels
 
         private void Load()
         {
-            _audioHandler.Load();
-            SelectInputFile();
+            try
+            {
+                _audioHandler.Load();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         public void Dispose()

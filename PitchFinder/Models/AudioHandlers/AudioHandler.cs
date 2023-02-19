@@ -1,8 +1,5 @@
 ﻿using NAudio.Wave;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -24,8 +21,6 @@ namespace PitchFinder.Models
 
         public virtual bool IsPlaying { get; }
         public virtual bool IsStopped { get; }
-
-        public string InputPath { get; set; }
 
         public virtual long Position { get; set; }
         public virtual long Length { get; }

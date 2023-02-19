@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
 using NAudio.Wave;
 using System;
+using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
 
 namespace PitchFinder.Models
 {
@@ -8,6 +9,7 @@ namespace PitchFinder.Models
     {
         private IWavePlayer _playbackWave;
         private WaveStream _fileStream;
+        private string _inputPath;
 
         public override bool IsPlaying => _playbackWave != null && _playbackWave.PlaybackState == PlaybackState.Playing;
         public override bool IsStopped => _playbackWave == null || _playbackWave.PlaybackState == PlaybackState.Stopped;
@@ -60,8 +62,8 @@ namespace PitchFinder.Models
             }
             catch (Exception e)
             {
-                System.Windows.MessageBox.Show(e.Message, "Problem opening file");
                 CloseFile();
+                throw new Exception(e.Message);
             }
         }
 
@@ -80,18 +82,23 @@ namespace PitchFinder.Models
 
         public override void Play()
         {
+            if (string.IsNullOrEmpty(_inputPath))
+            {
+                throw new Exception("Select a valid input file or URL first");
+            }
+
             if (_playbackWave == null)
             {
                 CreatePlayer();
             }
-            if (_lastPlayed != InputPath && _fileStream != null)
+            if (_lastPlayed != _inputPath && _fileStream != null)
             {
                 CloseFile();
             }
             if (_fileStream == null)
             {
-                Load(InputPath);
-                _lastPlayed = InputPath;
+                Load(_inputPath);
+                _lastPlayed = _inputPath;
                 _audioValues = new double[4096];
                 _inputBack = new double[4096];
                 WeakReferenceMessenger.Default.Send(new Messages.SampleRateChangedMessage(SampleRate));
@@ -131,6 +138,32 @@ namespace PitchFinder.Models
             if (_fileStream != null)
             {
                 CloseFile();
+            }
+
+            SelectInputFile();
+        }
+
+        private void SelectInputFile()
+        {
+            var ofd = new OpenFileDialog();
+            if (ofd.ShowDialog() == true)
+            {
+                OpenInputFile(ofd.FileName);
+            }
+        }
+
+        private void OpenInputFile(string file)
+        {
+            try
+            {
+                using (var tempReader = new AudioFileReader(file))
+                {
+                    _inputPath = file;
+                }
+            }
+            catch (Exception e)
+            {
+                throw new Exception($"Not a supported input file ({e.Message})");
             }
         }
 
