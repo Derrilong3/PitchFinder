@@ -11,9 +11,9 @@ namespace PitchFinder.Models
         protected double[] _inputBack;
         protected string _lastPlayed;
 
-        protected CancellationTokenSource _cts;
-        protected CancellationToken _token;
-        protected AutoResetEvent _processEvt;
+        private CancellationTokenSource _cts;
+        private CancellationToken _token;
+        private AutoResetEvent _processEvt;
         protected SampleReader _reader;
 
         public double[] Samples => _inputBack;
@@ -42,7 +42,7 @@ namespace PitchFinder.Models
         {
             while (!_token.IsCancellationRequested)
             {
-                if (_processEvt.WaitOne(100))
+                if (_processEvt.WaitOne())
                 {
                     lock (_audioValues)
                     {
@@ -80,6 +80,8 @@ namespace PitchFinder.Models
 
         public virtual void Dispose()
         {
+            _cts.Cancel();
+            _cts.Dispose();
         }
     }
 }

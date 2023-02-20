@@ -23,7 +23,7 @@ namespace PitchFinder.ViewModels
         public MediaPlaybackViewModel() : base("Media Window")
         {
             ContentId = "MediaTool";
-            _audioHandler = new AudioFileHandler();
+            _audioHandler = new FileAudioHandler();
             _audioHandler.PlaybackStopped += WavePlayerOnPlaybackStopped;
             _analyzeModel = new AudioAnalyzeModel(_audioHandler);
             LoadCommand = new RelayCommand(Load, () => _audioHandler.IsStopped);

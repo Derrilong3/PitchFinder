@@ -5,7 +5,7 @@ using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
 
 namespace PitchFinder.Models
 {
-    class AudioFileHandler : AudioHandler
+    class FileAudioHandler : AudioHandler
     {
         private IWavePlayer _playbackWave;
         private WaveStream _fileStream;
@@ -169,6 +169,7 @@ namespace PitchFinder.Models
 
         public override void Dispose()
         {
+            base.Dispose();
             Stop();
             CloseFile();
             _playbackWave?.Dispose();
