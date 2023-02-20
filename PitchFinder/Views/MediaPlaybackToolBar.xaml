@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:PitchFinder.Views"
+             xmlns:local="clr-namespace:PitchFinder.Models"
              xmlns:vm="clr-namespace:PitchFinder.ViewModels"
              xmlns:conv="clr-namespace:PitchFinder.Converters"
              mc:Ignorable="d" 
@@ -17,7 +17,7 @@
         <vm:MediaPlaybackViewModel/>
     </ToolBar.DataContext>
 
-    <Button Command="{Binding LoadCommand}" SnapsToDevicePixels="True" FontFamily="Segoe MDL2 Assets" FontSize="24" Content="&#xE8B7;"/>
+    <Button Command="{Binding LoadCommand}" CommandParameter="{x:Type local:FileAudioHandler}" SnapsToDevicePixels="True" FontFamily="Segoe MDL2 Assets" FontSize="24" Content="&#xE8B7;"/>
     <Separator Margin="3" Background="Black"/>
     <Button SnapsToDevicePixels="True" FontFamily="Segoe MDL2 Assets" FontSize="24" Content="&#xF6FA;"/>
     <Separator Margin="3" Background="Black"/>

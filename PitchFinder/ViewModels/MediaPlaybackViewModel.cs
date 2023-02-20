@@ -1,6 +1,7 @@
 ﻿using NAudio.Wave;
 using PitchFinder.Models;
 using System;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Threading;
 
@@ -16,6 +17,7 @@ namespace PitchFinder.ViewModels
         private IAudioHandler _audioHandler;
         private AudioAnalyzeModel _analyzeModel;
 
+        public bool IsPlaying { get => _audioHandler.IsPlaying; }
         public RelayCommand LoadCommand { get; }
         public RelayCommand PlayPauseCommand { get; }
         public RelayCommand StopCommand { get; }
@@ -23,14 +25,16 @@ namespace PitchFinder.ViewModels
         public MediaPlaybackViewModel() : base("Media Window")
         {
             ContentId = "MediaTool";
-            _audioHandler = new FileAudioHandler();
-            _audioHandler.PlaybackStopped += WavePlayerOnPlaybackStopped;
-            _analyzeModel = new AudioAnalyzeModel(_audioHandler);
-            LoadCommand = new RelayCommand(Load, () => _audioHandler.IsStopped);
+
+            Init(typeof(FileAudioHandler));
+
+            LoadCommand = new RelayCommand(obj => Load((Type)obj), (obj) => _audioHandler.IsStopped);
             PlayPauseCommand = new RelayCommand(PlayPauseInvoke);
             StopCommand = new RelayCommand(Stop, () => !_audioHandler.IsStopped);
+
             timer.Interval = TimeSpan.FromMilliseconds(10);
             timer.Tick += TimerOnTick;
+
             TimePosition = new TimeSpan(0, 0, 0).ToString("mm\\:ss");
         }
 
@@ -51,11 +55,6 @@ namespace PitchFinder.ViewModels
             sliderPosition = Math.Min(SliderMax, _audioHandler.Position * SliderMax / _audioHandler.Length);
             TimePosition = _audioHandler.CurrentTime.ToString("mm\\:ss");
             OnPropertyChanged("SliderPosition");
-        }
-
-        public bool IsPlaying
-        {
-            get => _audioHandler.IsPlaying;
         }
 
         public string TimePosition
@@ -85,7 +84,6 @@ namespace PitchFinder.ViewModels
                 }
             }
         }
-
 
         private void PlayPauseInvoke()
         {
@@ -122,16 +120,29 @@ namespace PitchFinder.ViewModels
             timer.Stop();
         }
 
-        private void Load()
+        private void Load(Type audioHandler)
         {
             try
             {
+                if(_audioHandler?.GetType() != audioHandler)
+                {
+                    Init(audioHandler);
+                }
+
                 _audioHandler.Load();
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        private void Init(Type type)
+        {
+            _audioHandler?.Dispose();
+            _audioHandler = (IAudioHandler)Activator.CreateInstance(type);
+            _audioHandler.PlaybackStopped += WavePlayerOnPlaybackStopped;
+            _analyzeModel = new AudioAnalyzeModel(_audioHandler);
         }
 
         public void Dispose()
