@@ -124,12 +124,15 @@ namespace PitchFinder.ViewModels
         {
             try
             {
-                if(_audioHandler?.GetType() != audioHandler)
+                if (_audioHandler?.GetType() != audioHandler)
                 {
                     Init(audioHandler);
                 }
 
-                _audioHandler.Load();
+                if (_audioHandler.Load())
+                {
+                    PlayPauseInvoke();
+                }
             }
             catch (Exception ex)
             {

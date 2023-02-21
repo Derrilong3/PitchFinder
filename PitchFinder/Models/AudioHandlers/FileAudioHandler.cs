@@ -16,7 +16,7 @@ namespace PitchFinder.Models
 
         public override long Position
         {
-            get => _fileStream.Position;
+            get => _fileStream != null ? _fileStream.Position : 0;
             set
             {
                 if (_fileStream != null)
@@ -25,7 +25,7 @@ namespace PitchFinder.Models
         }
 
         public override long Length => _fileStream != null ? _fileStream.Length : 0;
-        public override TimeSpan CurrentTime => _fileStream.CurrentTime;
+        public override TimeSpan CurrentTime => _fileStream != null ? _fileStream.CurrentTime : new TimeSpan();
 
         public override event EventHandler<StoppedEventArgs> PlaybackStopped;
 
@@ -70,9 +70,7 @@ namespace PitchFinder.Models
         private void EnsureDeviceCreated()
         {
             if (_playbackWave == null)
-            {
                 CreateDevice();
-            }
         }
 
         public void CreateDevice()
@@ -119,37 +117,38 @@ namespace PitchFinder.Models
             {
                 _playbackWave?.Stop();
                 if (_fileStream != null)
-                {
                     _fileStream.Position = 0;
-                }
             }
         }
 
         public override void Pause()
         {
             if (_playbackWave != null)
-            {
                 _playbackWave.Pause();
-            }
         }
 
-        public override void Load()
+        public override bool Load()
         {
-            if (_fileStream != null)
-            {
-                CloseFile();
-            }
+            if (!SelectInputFile())
+                return false;
 
-            SelectInputFile();
+            if (_fileStream != null)
+                CloseFile();
+            else
+                base.Load();
+
+            return true;
         }
 
-        private void SelectInputFile()
+        private bool SelectInputFile()
         {
             var ofd = new OpenFileDialog();
-            if (ofd.ShowDialog() == true)
-            {
+
+            bool result = (bool)ofd.ShowDialog();
+            if (result == true)
                 OpenInputFile(ofd.FileName);
-            }
+
+            return result;
         }
 
         private void OpenInputFile(string file)

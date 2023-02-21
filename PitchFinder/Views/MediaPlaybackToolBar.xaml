@@ -21,7 +21,7 @@
     <Separator Margin="3" Background="Black"/>
     <Button SnapsToDevicePixels="True" FontFamily="Segoe MDL2 Assets" FontSize="24" Content="&#xF6FA;"/>
     <Separator Margin="3" Background="Black"/>
-    <Button SnapsToDevicePixels="True" FontFamily="Segoe MDL2 Assets" FontSize="24" Content="&#xE720;"/>
+    <Button Command="{Binding LoadCommand}" CommandParameter="{x:Type local:DeviceAudioHandler}" SnapsToDevicePixels="True" FontFamily="Segoe MDL2 Assets" FontSize="24" Content="&#xE720;"/>
     <Separator Margin="3" Background="Black"/>
     <Button Command="{Binding StopCommand}" SnapsToDevicePixels="True" FontFamily="Segoe MDL2 Assets" FontSize="24" Content="&#xE71A;"/>
     <Button Command="{Binding PlayPauseCommand}" SnapsToDevicePixels="True" FontFamily="Segoe MDL2 Assets" FontSize="24" Content="{Binding IsPlaying, Converter={StaticResource BoolToPlayPauseConverter}}"/>

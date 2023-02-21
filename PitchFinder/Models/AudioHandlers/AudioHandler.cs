@@ -29,15 +29,6 @@ namespace PitchFinder.Models
         public virtual event EventHandler<StoppedEventArgs> PlaybackStopped;
         public event EventHandler DataReceived;
 
-        public AudioHandler()
-        {
-            _cts = new CancellationTokenSource();
-            _token = _cts.Token;
-
-            _processEvt = new AutoResetEvent(false);
-            _ = Task.Run(ProcessData, _cts.Token);
-        }
-
         private void ProcessData()
         {
             while (!_token.IsCancellationRequested)
@@ -62,8 +53,15 @@ namespace PitchFinder.Models
             }
         }
 
-        public virtual void Load()
+        public virtual bool Load()
         {
+            _cts = new CancellationTokenSource();
+            _token = _cts.Token;
+
+            _processEvt = new AutoResetEvent(false);
+            _ = Task.Run(ProcessData, _cts.Token);
+
+            return true;
         }
 
         public virtual void Pause()
@@ -80,8 +78,8 @@ namespace PitchFinder.Models
 
         public virtual void Dispose()
         {
-            _cts.Cancel();
-            _cts.Dispose();
+            _cts?.Cancel();
+            _cts?.Dispose();
         }
     }
 }

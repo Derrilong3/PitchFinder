@@ -19,6 +19,6 @@ namespace PitchFinder.Models
         public void Play();
         public void Stop();
         public void Pause();
-        public void Load();
+        public bool Load();
     }
 }
