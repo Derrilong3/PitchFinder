@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
+using PitchFinder.ViewModels;
 using FftSharp;
 
 namespace PitchFinder.Menu.MenuItems
@@ -23,7 +24,7 @@ namespace PitchFinder.Menu.MenuItems
         {
             var menuItemViewModel = new MenuItemViewModel(window.Name, true);
             menuItemViewModel.IsChecked = false;
-            menuItemViewModel.Command = new Models.RelayCommand(() =>
+            menuItemViewModel.Command = new RelayCommand(() =>
             {
                 SelectedFunc.IsCheckable = true;
                 SelectedFunc.IsChecked = false;

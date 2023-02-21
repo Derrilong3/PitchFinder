@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Windows.Input;
 
-namespace PitchFinder.Models
+namespace PitchFinder.ViewModels
 {
     public class RelayCommand : ICommand
     {
