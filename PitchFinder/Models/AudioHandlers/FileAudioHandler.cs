@@ -5,27 +5,14 @@ using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
 
 namespace PitchFinder.Models
 {
-    class FileAudioHandler : AudioHandler
+    class FileAudioHandler : AudioHandler, IAudioProgressBar
     {
         private IWavePlayer _playbackWave;
-        private WaveStream _fileStream;
         private string _inputPath;
 
+        public WaveStreamWrapper WaveWrapper { get; set; }
         public override bool IsPlaying => _playbackWave != null && _playbackWave.PlaybackState == PlaybackState.Playing;
         public override bool IsStopped => _playbackWave == null || _playbackWave.PlaybackState == PlaybackState.Stopped;
-
-        public override long Position
-        {
-            get => _fileStream != null ? _fileStream.Position : 0;
-            set
-            {
-                if (_fileStream != null)
-                    _fileStream.Position = value;
-            }
-        }
-
-        public override long Length => _fileStream != null ? _fileStream.Length : 0;
-        public override TimeSpan CurrentTime => _fileStream != null ? _fileStream.CurrentTime : new TimeSpan();
 
         public override event EventHandler<StoppedEventArgs> PlaybackStopped;
 
@@ -44,8 +31,9 @@ namespace PitchFinder.Models
 
         public void CloseFile()
         {
-            _fileStream?.Dispose();
-            _fileStream = null;
+            WaveWrapper?.Dispose();
+            if (WaveWrapper.WaveStream != null)
+                WaveWrapper.WaveStream = null;
         }
 
         private void OpenFile(string fileName)
@@ -53,7 +41,7 @@ namespace PitchFinder.Models
             try
             {
                 var inputStream = new AudioFileReader(fileName);
-                _fileStream = inputStream;
+                WaveWrapper.WaveStream = inputStream;
                 _reader = new SampleReader(inputStream.WaveFormat);
                 var aggregator = new SampleAggregator(inputStream);
                 SampleRate = inputStream.WaveFormat.SampleRate;
@@ -89,11 +77,11 @@ namespace PitchFinder.Models
             {
                 CreatePlayer();
             }
-            if (_lastPlayed != _inputPath && _fileStream != null)
+            if (_lastPlayed != _inputPath && WaveWrapper.WaveStream != null)
             {
                 CloseFile();
             }
-            if (_fileStream == null)
+            if (WaveWrapper.WaveStream == null)
             {
                 Load(_inputPath);
                 _lastPlayed = _inputPath;
@@ -116,8 +104,8 @@ namespace PitchFinder.Models
             if (_playbackWave != null)
             {
                 _playbackWave?.Stop();
-                if (_fileStream != null)
-                    _fileStream.Position = 0;
+                if (WaveWrapper.WaveStream != null)
+                    WaveWrapper.WaveStream.Position = 0;
             }
         }
 
@@ -132,7 +120,7 @@ namespace PitchFinder.Models
             if (!SelectInputFile())
                 return false;
 
-            if (_fileStream != null)
+            if (WaveWrapper.WaveStream != null)
                 CloseFile();
             else
                 base.Load();

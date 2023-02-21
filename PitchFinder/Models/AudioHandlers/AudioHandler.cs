@@ -22,10 +22,6 @@ namespace PitchFinder.Models
         public virtual bool IsPlaying { get; }
         public virtual bool IsStopped { get; }
 
-        public virtual long Position { get; set; }
-        public virtual long Length { get; }
-        public virtual TimeSpan CurrentTime { get; }
-
         public virtual event EventHandler<StoppedEventArgs> PlaybackStopped;
         public event EventHandler DataReceived;
 

@@ -1,7 +1,6 @@
 ﻿using NAudio.Wave;
 using PitchFinder.Models;
 using System;
-using System.Reflection;
 using System.Windows;
 using System.Windows.Threading;
 
@@ -13,10 +12,11 @@ namespace PitchFinder.ViewModels
         private string timerPosition;
         private double sliderPosition;
 
-        private readonly DispatcherTimer timer = new DispatcherTimer();
+        private DispatcherTimer _timer = new DispatcherTimer();
         private IAudioHandler _audioHandler;
         private AudioAnalyzeModel _analyzeModel;
 
+        public WaveStreamWrapper _waveStream;
         public bool IsPlaying { get => _audioHandler.IsPlaying; }
         public RelayCommand LoadCommand { get; }
         public RelayCommand PlayPauseCommand { get; }
@@ -32,9 +32,6 @@ namespace PitchFinder.ViewModels
             PlayPauseCommand = new RelayCommand(PlayPauseInvoke);
             StopCommand = new RelayCommand(Stop, () => !_audioHandler.IsStopped);
 
-            timer.Interval = TimeSpan.FromMilliseconds(10);
-            timer.Tick += TimerOnTick;
-
             TimePosition = new TimeSpan(0, 0, 0).ToString("mm\\:ss");
         }
 
@@ -42,7 +39,7 @@ namespace PitchFinder.ViewModels
         {
             SliderPosition = 0;
             TimePosition = new TimeSpan(0, 0, 0).ToString("mm\\:ss");
-            timer.Stop();
+            _timer.Stop();
 
             if (stoppedEventArgs.Exception != null)
             {
@@ -52,8 +49,8 @@ namespace PitchFinder.ViewModels
 
         private void TimerOnTick(object sender, EventArgs eventArgs)
         {
-            sliderPosition = Math.Min(SliderMax, _audioHandler.Position * SliderMax / _audioHandler.Length);
-            TimePosition = _audioHandler.CurrentTime.ToString("mm\\:ss");
+            sliderPosition = Math.Min(SliderMax, _waveStream.WaveStream.Position * SliderMax / _waveStream.WaveStream.Length);
+            TimePosition = _waveStream.WaveStream.CurrentTime.ToString("mm\\:ss");
             OnPropertyChanged("SliderPosition");
         }
 
@@ -78,9 +75,12 @@ namespace PitchFinder.ViewModels
                 if (sliderPosition != value)
                 {
                     sliderPosition = value;
-                    var pos = (long)(_audioHandler.Length * sliderPosition / SliderMax);
-                    _audioHandler.Position = pos;
-                    OnPropertyChanged("SliderPosition");
+                    if (_waveStream.WaveStream != null)
+                    {
+                        var pos = (long)(_waveStream.WaveStream.Length * sliderPosition / SliderMax);
+                        _waveStream.WaveStream.Position = pos;
+                        OnPropertyChanged("SliderPosition");
+                    }
                 }
             }
         }
@@ -100,7 +100,7 @@ namespace PitchFinder.ViewModels
             try
             {
                 _audioHandler.Play();
-                timer.Start();
+                _timer.Start();
             }
             catch (Exception ex)
             {
@@ -117,7 +117,7 @@ namespace PitchFinder.ViewModels
         private void Pause()
         {
             _audioHandler.Pause();
-            timer.Stop();
+            _timer.Stop();
         }
 
         private void Load(Type audioHandler)
@@ -146,12 +146,20 @@ namespace PitchFinder.ViewModels
             _audioHandler = (IAudioHandler)Activator.CreateInstance(type);
             _audioHandler.PlaybackStopped += WavePlayerOnPlaybackStopped;
             _analyzeModel = new AudioAnalyzeModel(_audioHandler);
+            _timer = new DispatcherTimer();
+
+            if (type.GetInterface(nameof(IAudioProgressBar)) != null)
+            {
+                _waveStream = new WaveStreamWrapper();
+                ((IAudioProgressBar)_audioHandler).WaveWrapper = _waveStream;
+                _timer.Interval = TimeSpan.FromMilliseconds(10);
+                _timer.Tick += TimerOnTick;
+            }
         }
 
         public void Dispose()
         {
             _audioHandler.Dispose();
         }
-
     }
 }
