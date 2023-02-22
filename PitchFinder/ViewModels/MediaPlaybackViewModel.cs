@@ -11,6 +11,7 @@ namespace PitchFinder.ViewModels
         const double SliderMax = 10.0;
         private string timerPosition;
         private double sliderPosition;
+        private double _tempo;
 
         private DispatcherTimer _timer = new DispatcherTimer();
         private IAudioHandler _audioHandler;
@@ -31,6 +32,7 @@ namespace PitchFinder.ViewModels
             LoadCommand = new RelayCommand(obj => Load((Type)obj), (obj) => _audioHandler.IsStopped);
             PlayPauseCommand = new RelayCommand(PlayPauseInvoke);
             StopCommand = new RelayCommand(Stop, () => !_audioHandler.IsStopped);
+            Tempo = 1;
 
             TimePosition = new TimeSpan(0, 0, 0).ToString("mm\\:ss");
         }
@@ -80,6 +82,23 @@ namespace PitchFinder.ViewModels
                         var pos = (long)(_waveStream.WaveStream.Length * sliderPosition / SliderMax);
                         _waveStream.WaveStream.Position = pos;
                         OnPropertyChanged("SliderPosition");
+                    }
+                }
+            }
+        }
+
+        public double Tempo
+        {
+            get => _tempo;
+            set
+            {
+                if (_tempo != value)
+                {
+                    _tempo = value;
+                    if (_waveStream.SoundTouchProvider != null)
+                    {
+                        _waveStream.SoundTouchProvider.Tempo = _tempo;
+                        OnPropertyChanged("Tempo");
                     }
                 }
             }

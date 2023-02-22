@@ -25,6 +25,9 @@
     <Separator Margin="3" Background="Black"/>
     <Button Command="{Binding StopCommand}" SnapsToDevicePixels="True" FontFamily="Segoe MDL2 Assets" FontSize="24" Content="&#xE71A;"/>
     <Button Command="{Binding PlayPauseCommand}" SnapsToDevicePixels="True" FontFamily="Segoe MDL2 Assets" FontSize="24" Content="{Binding IsPlaying, Converter={StaticResource BoolToPlayPauseConverter}}"/>
-    <Slider Value="{Binding SliderPosition, Mode=TwoWay}" AutoToolTipPlacement="None" Orientation="Horizontal" Width="553" VerticalAlignment="Center" HorizontalAlignment="Center" />
+    <Slider Value="{Binding SliderPosition, Mode=TwoWay}" IsMoveToPointEnabled="true" AutoToolTipPlacement="None" Orientation="Horizontal" Width="449" VerticalAlignment="Center" />
     <Label Content="{Binding TimePosition}" Height="30"/>
+    <Separator Margin="3" Background="Black"/>
+    <Slider  Value="{Binding Tempo}" Minimum="0.01" Maximum="3" Width="100" Height="20" ToolTip="{Binding Tempo}" IsMoveToPointEnabled="true" AutoToolTipPlacement ="BottomRight" AutoToolTipPrecision="2"/>
+
 </ToolBar>

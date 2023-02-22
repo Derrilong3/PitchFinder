@@ -41,9 +41,10 @@ namespace PitchFinder.Models
             try
             {
                 var inputStream = new AudioFileReader(fileName);
+                WaveWrapper.SoundTouchProvider = new SoundTouch.Net.NAudioSupport.SoundTouchWaveProvider(inputStream);
                 WaveWrapper.WaveStream = inputStream;
                 _reader = new SampleReader(inputStream.WaveFormat);
-                var aggregator = new SampleAggregator(inputStream);
+                var aggregator = new SampleAggregator(WaveWrapper.SoundTouchProvider);
                 SampleRate = inputStream.WaveFormat.SampleRate;
                 aggregator.BufferEventArgs += audioGraph_Buffer;
                 _playbackWave.Init(aggregator);
