@@ -5,6 +5,8 @@
         private string _title;
         private bool _isVisible = false;
         private string _contentId = null;
+        private bool _isSelected = false;
+        private bool _isActive = false;
 
         public ToolViewModel(string name)
         {
@@ -46,6 +48,32 @@
                 {
                     _isVisible = value;
                     OnPropertyChanged(nameof(IsVisible));
+                }
+            }
+        }
+        
+        public bool IsSelected
+        {
+            get { return _isSelected; }
+            set
+            {
+                if (_isSelected != value)
+                {
+                    _isSelected = value;
+                    OnPropertyChanged(nameof(IsSelected));
+                }
+            }
+        }
+        
+        public bool IsActive
+        {
+            get { return _isActive; }
+            set
+            {
+                if (_isActive != value)
+                {
+                    _isActive = value;
+                    OnPropertyChanged(nameof(IsActive));
                 }
             }
         }
