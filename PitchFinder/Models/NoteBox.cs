@@ -7,16 +7,16 @@ namespace PitchFinder.Models
     {
         public string Text { get; set; }
 
-        private Color color;
+        private Color _color;
         public Color Color
         {
             get
             {
-                return color;
+                return _color;
             }
             set
             {
-                color = value;
+                _color = value;
                 OnPropertyChanged(nameof(Color));
             }
         }

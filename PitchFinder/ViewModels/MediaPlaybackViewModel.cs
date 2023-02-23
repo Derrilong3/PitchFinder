@@ -8,16 +8,13 @@ namespace PitchFinder.ViewModels
 {
     internal class MediaPlaybackViewModel : ToolViewModel, IDisposable
     {
-        const double SliderMax = 10.0;
-        private string timerPosition;
-        private double sliderPosition;
-        private double _tempo;
+        private const double SliderMax = 10.0;
 
-        private DispatcherTimer _timer = new DispatcherTimer();
+        private DispatcherTimer _timer;
         private IAudioHandler _audioHandler;
         private AudioAnalyzeModel _analyzeModel;
+        private WaveStreamWrapper _waveStream;
 
-        public WaveStreamWrapper _waveStream;
         public bool IsPlaying { get => _audioHandler.IsPlaying; }
         public RelayCommand LoadCommand { get; }
         public RelayCommand PlayPauseCommand { get; }
@@ -35,6 +32,7 @@ namespace PitchFinder.ViewModels
             Tempo = 1;
 
             TimePosition = new TimeSpan(0, 0, 0).ToString("mm\\:ss");
+            _timer = new DispatcherTimer();
         }
 
         private void WavePlayerOnPlaybackStopped(object sender, StoppedEventArgs stoppedEventArgs)
@@ -51,35 +49,37 @@ namespace PitchFinder.ViewModels
 
         private void TimerOnTick(object sender, EventArgs eventArgs)
         {
-            sliderPosition = Math.Min(SliderMax, _waveStream.WaveStream.Position * SliderMax / _waveStream.WaveStream.Length);
+            _sliderPosition = Math.Min(SliderMax, _waveStream.WaveStream.Position * SliderMax / _waveStream.WaveStream.Length);
             TimePosition = _waveStream.WaveStream.CurrentTime.ToString("mm\\:ss");
             OnPropertyChanged("SliderPosition");
         }
 
+        private string _timerPosition;
         public string TimePosition
         {
-            get => timerPosition;
+            get => _timerPosition;
             set
             {
-                if (timerPosition == value)
+                if (_timerPosition == value)
                     return;
 
-                timerPosition = value;
+                _timerPosition = value;
                 OnPropertyChanged("TimePosition");
             }
         }
 
+        private double _sliderPosition;
         public double SliderPosition
         {
-            get => sliderPosition;
+            get => _sliderPosition;
             set
             {
-                if (sliderPosition != value)
+                if (_sliderPosition != value)
                 {
-                    sliderPosition = value;
+                    _sliderPosition = value;
                     if (_waveStream.WaveStream != null)
                     {
-                        var pos = (long)(_waveStream.WaveStream.Length * sliderPosition / SliderMax);
+                        var pos = (long)(_waveStream.WaveStream.Length * _sliderPosition / SliderMax);
                         _waveStream.WaveStream.Position = pos;
                         OnPropertyChanged("SliderPosition");
                     }
@@ -87,6 +87,7 @@ namespace PitchFinder.ViewModels
             }
         }
 
+        private double _tempo;
         public double Tempo
         {
             get => _tempo;

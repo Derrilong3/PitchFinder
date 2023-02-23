@@ -11,63 +11,64 @@ namespace PitchFinder.Models
 {
     class GraphModel : ViewModelBase
     {
-        private PlotModel plotModel;
-        private float singleFrequency;
-        private string singleNote;
-        private Chromagram chromagram;
-        private int sampleRate;
-        private string[] noteNames = { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" };
+        private Chromagram _chromagram;
+        private int _sampleRate;
+        private const string[] _noteNames = { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" };
 
         public ObservableCollection<NoteBox> ColorMulti { get; private set; }
 
         public GraphModel()
         {
-            plotModel = new PlotModel();
-            plotModel.Series.Add(new LineSeries());
-            plotModel.Axes.Add(new OxyPlot.Axes.LinearAxis() { Position = OxyPlot.Axes.AxisPosition.Bottom, Maximum = 2000 });
-            plotModel.Axes.Add(new OxyPlot.Axes.LinearAxis() { Position = OxyPlot.Axes.AxisPosition.Left, Maximum = 0.05f });
+            _plotModel = new PlotModel();
+            _plotModel.Series.Add(new LineSeries());
+            _plotModel.Axes.Add(new OxyPlot.Axes.LinearAxis() { Position = OxyPlot.Axes.AxisPosition.Bottom, Maximum = 2000 });
+            _plotModel.Axes.Add(new OxyPlot.Axes.LinearAxis() { Position = OxyPlot.Axes.AxisPosition.Left, Maximum = 0.05f });
             ColorMulti = new ObservableCollection<NoteBox>();
-            chromagram = new Chromagram();
+            _chromagram = new Chromagram();
 
-            for (int i = 0; i < noteNames.Length; i++)
+            for (int i = 0; i < _noteNames.Length; i++)
             {
-                ColorMulti.Add(new NoteBox() { Text = noteNames[i], Color = Color.FromRgb(0, 0, 0) });
+                ColorMulti.Add(new NoteBox() { Text = _noteNames[i], Color = Color.FromRgb(0, 0, 0) });
             }
 
             WeakReferenceMessenger.Default.Register<Messages.FFTChangedMessage>(this, FFTUpdated);
             WeakReferenceMessenger.Default.Register<Messages.SampleRateChangedMessage>(this, SampleRateUpdated);
         }
 
+        private PlotModel _plotModel;
         public PlotModel PlotModel
         {
-            get => plotModel;
+            get => _plotModel;
             set
             {
-                plotModel = value;
+                _plotModel = value;
                 OnPropertyChanged("PlotModel");
             }
         }
 
+        private float _singleFrequency;
         public float SingleFrequency
         {
-            get => singleFrequency;
+            get => _singleFrequency;
             set
             {
-                if (singleFrequency != value)
+                if (_singleFrequency != value)
                 {
-                    singleFrequency = value;
+                    _singleFrequency = value;
                     OnPropertyChanged("SingleFrequency");
                 }
             }
         }
+
+        private string _singleNote;
         public string SingleNote
         {
-            get => singleNote;
+            get => _singleNote;
             set
             {
-                if (singleNote != value)
+                if (_singleNote != value)
                 {
-                    singleNote = value;
+                    _singleNote = value;
                     OnPropertyChanged("SingleNote");
                 }
             }
@@ -75,15 +76,15 @@ namespace PitchFinder.Models
 
         private void Init()
         {
-            chromagram.Initialize(sampleRate);
-            plotModel.Series.Clear();
-            plotModel.Series.Add(new LineSeries());
-            plotModel.InvalidatePlot(true);
+            _chromagram.Initialize(_sampleRate);
+            _plotModel.Series.Clear();
+            _plotModel.Series.Add(new LineSeries());
+            _plotModel.InvalidatePlot(true);
         }
 
         public void SampleRateUpdated(object obj, Messages.SampleRateChangedMessage message)
         {
-            sampleRate = message.Value;
+            _sampleRate = message.Value;
             Init();
         }
 
@@ -112,10 +113,10 @@ namespace PitchFinder.Models
                 if (message.Value.Y[i] > message.Value.Y[peakIndex])
                     peakIndex = i;
             }
-            double fftPeriod = FftSharp.Transform.FFTfreqPeriod(sampleRate, message.Value.Y.Length);
+            double fftPeriod = FftSharp.Transform.FFTfreqPeriod(_sampleRate, message.Value.Y.Length);
             float peakFrequency = (float)Math.Round((fftPeriod * peakIndex) * 100f) / 100f;
 
-            var chroma = chromagram.GetChroma(message.Value.Y);
+            var chroma = _chromagram.GetChroma(message.Value.Y);
 
             App.Current.Dispatcher.BeginInvoke((System.Action)delegate
             {
