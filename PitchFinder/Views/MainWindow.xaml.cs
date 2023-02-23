@@ -37,10 +37,10 @@ namespace PitchFinder.Views
 
         private void MainWindow_Unloaded(object sender, CancelEventArgs e)
         {
-            ((MediaPlaybackViewModel)(toolbar.ToolBars[0].DataContext)).Dispose();
             var serializer = new AvalonDock.Layout.Serialization.XmlLayoutSerializer(dockManager);
             serializer.Serialize(@".\AvalonDock.config");
             Properties.Settings.Default.Save();
+            ((MainViewModel)(DataContext)).Dispose();
         }
     }
 }

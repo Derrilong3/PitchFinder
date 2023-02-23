@@ -4,6 +4,7 @@
         xmlns:local="clr-namespace:PitchFinder.ViewModels" 
         xmlns:dock="https://github.com/Dirkster99/AvalonDock" 
         xmlns:v="clr-namespace:PitchFinder.Views"
+        xmlns:m="clr-namespace:PitchFinder.Models"
         xmlns:menu="clr-namespace:PitchFinder.Menu"
         xmlns:conv="clr-namespace:PitchFinder.Converters"
         xmlns:sys="clr-namespace:System;assembly=System.Runtime"
@@ -17,6 +18,7 @@
         <sys:Boolean x:Key="TRUE">True</sys:Boolean>
         <sys:Boolean x:Key="FALSE">False</sys:Boolean>
         <conv:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+        <conv:BoolToPlayPauseConverter x:Key="BoolToPlayPauseConverter" />
         <DataTemplate DataType="{x:Type local:PlotViewModel}">
             <v:PlotView/>
         </DataTemplate>
@@ -43,9 +45,30 @@
             </Menu.Resources>
         </Menu>
 
-        <ToolBarTray Name="toolbar" SnapsToDevicePixels="True" Grid.Row="1" Background="#FFF0F0F0">
-            <v:MediaPlaybackToolBar/>
-        </ToolBarTray>
+        <Grid DataContext="{Binding ToolBarViewModel}" Height="35" Grid.Row="1" Background="#FFF0F0F0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="36"/>
+                <ColumnDefinition Width="36"/>
+                <ColumnDefinition Width="36"/>
+                <ColumnDefinition Width="36"/>
+                <ColumnDefinition Width="36"/>
+                <ColumnDefinition Width="259*"/>
+                <ColumnDefinition Width="100"/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Button Command="{Binding LoadCommand}" CommandParameter="{x:Type m:FileAudioHandler}" BorderThickness="0" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}" Focusable="False" FontFamily="Segoe MDL2 Assets" FontSize="24" Content="&#xE8B7;" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+            <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Margin="0,6,0,5" Background="Black" Grid.Column="1" HorizontalAlignment="Left" Width="1"/>
+            <Button BorderThickness="0" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}" Focusable="False" Grid.Column="1" FontFamily="Segoe MDL2 Assets" FontSize="24" Content="&#xF6FA;" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+            <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Margin="0,6,0,5" Background="Black" Grid.Column="2" HorizontalAlignment="Left" Width="1"/>
+            <Button Command="{Binding LoadCommand}" CommandParameter="{x:Type m:DeviceAudioHandler}" BorderThickness="0" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}" Focusable="False" Grid.Column="2" FontFamily="Segoe MDL2 Assets" FontSize="24" Content="&#xE720;" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+            <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Margin="0,6,0,5" Background="Black" Grid.Column="3" HorizontalAlignment="Left" Width="1"/>
+            <Button Command="{Binding StopCommand}" BorderThickness="0" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}" Focusable="False" Grid.Column="3" FontFamily="Segoe MDL2 Assets" FontSize="24" Content="&#xE71A;" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+            <Button Command="{Binding PlayPauseCommand}" Content="{Binding IsPlaying, Converter={StaticResource BoolToPlayPauseConverter}}" BorderThickness="0" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}" Focusable="False" Grid.Column="4" FontFamily="Segoe MDL2 Assets" FontSize="24" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+            <Slider Value="{Binding SliderPosition, Mode=TwoWay}" IsMoveToPointEnabled="true" AutoToolTipPlacement="None" Orientation="Horizontal" VerticalAlignment="Center" Grid.Column="5" Margin="10,0,51,0" Height="18" />
+            <Label Content="{Binding TimePosition}" Grid.Column="5" HorizontalAlignment="Right" VerticalAlignment="Center" Padding="5,5,15,5" UseLayoutRounding="True" ScrollViewer.CanContentScroll="True"/>
+            <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Margin="0,6,0,5" Background="Black" Grid.Column="6" HorizontalAlignment="Left" Width="1"/>
+            <Slider  Value="{Binding Tempo}" Minimum="0.1" Maximum="3" Width="86" ToolTip="{Binding Tempo}" IsMoveToPointEnabled="true" AutoToolTipPlacement ="BottomRight" AutoToolTipPrecision="2" Grid.Column="6" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        </Grid>
 
         <dock:DockingManager x:Name="dockManager" Grid.Row="2"
                          AnchorablesSource="{Binding Anchorables}">
