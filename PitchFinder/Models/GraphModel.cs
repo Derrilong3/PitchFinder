@@ -4,7 +4,6 @@ using OxyPlot.Series;
 using PitchFinder.ViewModels;
 using System;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Windows.Media;
 
 namespace PitchFinder.Models
@@ -117,17 +116,21 @@ namespace PitchFinder.Models
             float peakFrequency = (float)Math.Round((fftPeriod * peakIndex) * 100f) / 100f;
 
             var chroma = _chromagram.GetChroma(message.Value.Y);
+            int idx = 0;
 
             App.Current.Dispatcher.BeginInvoke((System.Action)delegate
             {
                 for (int i = 0; i < ColorMulti.Count; i++)
                 {
+                    if (chroma[i] > chroma[idx])
+                        idx = i;
+
                     byte G = (byte)(255 * chroma[i]);
                     ColorMulti[i].Color = Color.FromRgb(0, G, 0);
                 }
 
                 SingleFrequency = peakFrequency;
-                SingleNote = ColorMulti.MaxBy(x => x.Color.G).Text;
+                SingleNote = ColorMulti[idx].Text;
             });
 
             PlotModel.InvalidatePlot(true);

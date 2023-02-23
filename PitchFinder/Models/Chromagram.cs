@@ -49,7 +49,7 @@ namespace PitchFinder.Models
             return chromagram;
         }
 
-        private double HzToOctaves(double freq, double A440) { return Math.Log2((16 * freq) / A440); }
+        private double HzToOctaves(double freq, double A440) { return Math.Log((16 * freq) / A440, 2); }
 
         //https://github.com/meyda/meyda/blob/main/src/utilities.ts#L179
         private double[][] NormalizeByColumn(double[][] a)

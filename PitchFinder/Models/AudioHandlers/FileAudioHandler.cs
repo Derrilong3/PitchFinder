@@ -64,7 +64,7 @@ namespace PitchFinder.Models
 
         public void CreateDevice()
         {
-            _playbackWave = new WaveOut { DesiredLatency = 100 };
+            _playbackWave = new WaveOutEvent { DesiredLatency = 100 };
         }
 
         public override void Play()
