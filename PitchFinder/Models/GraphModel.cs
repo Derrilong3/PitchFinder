@@ -105,13 +105,6 @@ namespace PitchFinder.Models
                 return;
             }
 
-            var chroma = chromagram.GetChroma(message.Value.Y);
-            for (int i = 0; i < ColorMulti.Count; i++)
-            {
-                byte G = (byte)(255 * chroma[i]);
-                ColorMulti[i].Color = Color.FromRgb(0, G, 0);
-            }
-
             //find the frequency peak
             int peakIndex = 0;
             for (int i = 0; i < message.Value.Y.Length; i++)
@@ -122,8 +115,20 @@ namespace PitchFinder.Models
             double fftPeriod = FftSharp.Transform.FFTfreqPeriod(sampleRate, message.Value.Y.Length);
             float peakFrequency = (float)Math.Round((fftPeriod * peakIndex) * 100f) / 100f;
 
-            SingleFrequency = peakFrequency;
-            SingleNote = ColorMulti.MaxBy(x => x.Color.G).Text;
+            var chroma = chromagram.GetChroma(message.Value.Y);
+
+            App.Current.Dispatcher.BeginInvoke((System.Action)delegate
+            {
+                for (int i = 0; i < ColorMulti.Count; i++)
+                {
+                    byte G = (byte)(255 * chroma[i]);
+                    ColorMulti[i].Color = Color.FromRgb(0, G, 0);
+                }
+
+                SingleFrequency = peakFrequency;
+                SingleNote = ColorMulti.MaxBy(x => x.Color.G).Text;
+            });
+
             PlotModel.InvalidatePlot(true);
         }
     }
