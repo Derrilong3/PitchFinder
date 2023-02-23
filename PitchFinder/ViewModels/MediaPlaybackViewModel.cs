@@ -23,6 +23,7 @@ namespace PitchFinder.ViewModels
         public MediaPlaybackViewModel() : base("Media Window")
         {
             ContentId = "MediaTool";
+            _timer = new DispatcherTimer();
 
             Init(typeof(FileAudioHandler));
 
@@ -32,7 +33,6 @@ namespace PitchFinder.ViewModels
             Tempo = 1;
 
             TimePosition = new TimeSpan(0, 0, 0).ToString("mm\\:ss");
-            _timer = new DispatcherTimer();
         }
 
         private void WavePlayerOnPlaybackStopped(object sender, StoppedEventArgs stoppedEventArgs)

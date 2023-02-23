@@ -13,7 +13,7 @@ namespace PitchFinder.Models
     {
         private Chromagram _chromagram;
         private int _sampleRate;
-        private const string[] _noteNames = { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" };
+        private readonly string[] _noteNames = { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" };
 
         public ObservableCollection<NoteBox> ColorMulti { get; private set; }
 
