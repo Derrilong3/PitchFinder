@@ -5,11 +5,13 @@ using PitchFinder.ViewModels;
 using System;
 using System.Collections.ObjectModel;
 using System.Windows.Media;
+using System.Windows.Threading;
 
 namespace PitchFinder.Models
 {
-    class GraphModel : ViewModelBase
+    class GraphModel : ViewModelBase, IDisposable
     {
+        private DispatcherOperation _task;
         private Chromagram _chromagram;
         private int _sampleRate;
         private readonly string[] _noteNames = { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" };
@@ -18,19 +20,6 @@ namespace PitchFinder.Models
 
         public GraphModel()
         {
-            _plotModel = new PlotModel();
-            _plotModel.Series.Add(new LineSeries());
-            _plotModel.Axes.Add(new OxyPlot.Axes.LinearAxis() { Position = OxyPlot.Axes.AxisPosition.Bottom, Maximum = 2000 });
-            _plotModel.Axes.Add(new OxyPlot.Axes.LinearAxis() { Position = OxyPlot.Axes.AxisPosition.Left, Maximum = 0.05f });
-            ColorMulti = new ObservableCollection<NoteBox>();
-            _chromagram = new Chromagram();
-
-            for (int i = 0; i < _noteNames.Length; i++)
-            {
-                ColorMulti.Add(new NoteBox() { Text = _noteNames[i], Color = Color.FromRgb(0, 0, 0) });
-            }
-
-            WeakReferenceMessenger.Default.Register<Messages.FFTChangedMessage>(this, FFTUpdated);
             WeakReferenceMessenger.Default.Register<Messages.SampleRateChangedMessage>(this, SampleRateUpdated);
         }
 
@@ -41,7 +30,6 @@ namespace PitchFinder.Models
             set
             {
                 _plotModel = value;
-                OnPropertyChanged("PlotModel");
             }
         }
 
@@ -73,8 +61,29 @@ namespace PitchFinder.Models
             }
         }
 
-        private void Init()
+        public void Init()
         {
+            _plotModel = new PlotModel();
+            _plotModel.Series.Add(new LineSeries());
+            _plotModel.Axes.Add(new OxyPlot.Axes.LinearAxis() { Position = OxyPlot.Axes.AxisPosition.Bottom, Maximum = 2000 });
+            _plotModel.Axes.Add(new OxyPlot.Axes.LinearAxis() { Position = OxyPlot.Axes.AxisPosition.Left, Maximum = 0.05f });
+            ColorMulti = new ObservableCollection<NoteBox>();
+            _chromagram = new Chromagram();
+            _chromagram.Initialize(_sampleRate);
+
+            for (int i = 0; i < _noteNames.Length; i++)
+            {
+                ColorMulti.Add(new NoteBox() { Text = _noteNames[i], Color = Color.FromRgb(0, 0, 0) });
+            }
+
+            WeakReferenceMessenger.Default.Register<Messages.FFTChangedMessage>(this, FFTUpdated);
+        }
+
+        private void Update()
+        {
+            if (_plotModel == null)
+                return;
+
             _chromagram.Initialize(_sampleRate);
             _plotModel.Series.Clear();
             _plotModel.Series.Add(new LineSeries());
@@ -84,7 +93,7 @@ namespace PitchFinder.Models
         public void SampleRateUpdated(object obj, Messages.SampleRateChangedMessage message)
         {
             _sampleRate = message.Value;
-            Init();
+            Update();
         }
 
         public void FFTUpdated(object obj, Messages.FFTChangedMessage message)
@@ -118,7 +127,7 @@ namespace PitchFinder.Models
             var chroma = _chromagram.GetChroma(message.Value.Y);
             int idx = 0;
 
-            App.Current.Dispatcher.BeginInvoke((System.Action)delegate
+            _task = App.Current.Dispatcher.BeginInvoke((System.Action)delegate
             {
                 for (int i = 0; i < ColorMulti.Count; i++)
                 {
@@ -134,6 +143,15 @@ namespace PitchFinder.Models
             });
 
             PlotModel.InvalidatePlot(true);
+        }
+
+        public void Dispose()
+        {
+            WeakReferenceMessenger.Default.Unregister<Messages.FFTChangedMessage>(this);
+            _task?.Wait();
+            ColorMulti = null;
+            _plotModel = null;
+            _chromagram = null;
         }
     }
 }

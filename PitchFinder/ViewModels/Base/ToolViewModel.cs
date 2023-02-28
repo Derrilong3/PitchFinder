@@ -47,6 +47,7 @@
                 if (_isVisible != value)
                 {
                     _isVisible = value;
+                    OnVisibilityChanged();
                     OnPropertyChanged(nameof(IsVisible));
                 }
             }
@@ -77,5 +78,7 @@
                 }
             }
         }
+
+        protected abstract void OnVisibilityChanged();
     }
 }

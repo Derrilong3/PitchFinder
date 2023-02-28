@@ -25,5 +25,22 @@ namespace PitchFinder.ViewModels
         {
             get => _model.ColorMulti;
         }
+
+        protected override void OnVisibilityChanged()
+        {
+            if (IsVisible)
+            {
+                if (_model != null)
+                {
+                    _model.Init();
+                    OnPropertyChanged(nameof(PlotModel));
+                    OnPropertyChanged(nameof(ColorMulti));
+                }
+            }
+            else
+            {
+                _model.Dispose();
+            }
+        }
     }
 }

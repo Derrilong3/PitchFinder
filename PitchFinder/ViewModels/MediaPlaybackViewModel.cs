@@ -6,7 +6,7 @@ using System.Windows.Threading;
 
 namespace PitchFinder.ViewModels
 {
-    internal class MediaPlaybackViewModel : ToolViewModel, IDisposable
+    internal class MediaPlaybackViewModel : ViewModelBase, IDisposable
     {
         private const double SliderMax = 10.0;
 
@@ -20,9 +20,8 @@ namespace PitchFinder.ViewModels
         public RelayCommand PlayPauseCommand { get; }
         public RelayCommand StopCommand { get; }
 
-        public MediaPlaybackViewModel() : base("Media Window")
+        public MediaPlaybackViewModel()
         {
-            ContentId = "MediaTool";
             _timer = new DispatcherTimer();
 
             Init(typeof(FileAudioHandler));
