@@ -3,6 +3,7 @@ using OxyPlot;
 using OxyPlot.Series;
 using PitchFinder.ViewModels;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Windows.Media;
 using System.Windows.Threading;
@@ -13,6 +14,7 @@ namespace PitchFinder.Models
     {
         private DispatcherOperation _task;
         private Chromagram _chromagram;
+        private LineSeries _lineSeries;
         private int _sampleRate;
         private readonly string[] _noteNames = { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" };
 
@@ -64,7 +66,8 @@ namespace PitchFinder.Models
         public void Init()
         {
             _plotModel = new PlotModel();
-            _plotModel.Series.Add(new LineSeries());
+            _lineSeries = new LineSeries();
+            _plotModel.Series.Add(_lineSeries);
             _plotModel.Axes.Add(new OxyPlot.Axes.LinearAxis() { Position = OxyPlot.Axes.AxisPosition.Bottom, Maximum = 2000 });
             _plotModel.Axes.Add(new OxyPlot.Axes.LinearAxis() { Position = OxyPlot.Axes.AxisPosition.Left, Maximum = 0.05f });
             ColorMulti = new ObservableCollection<NoteBox>();
@@ -86,7 +89,8 @@ namespace PitchFinder.Models
 
             _chromagram.Initialize(_sampleRate);
             _plotModel.Series.Clear();
-            _plotModel.Series.Add(new LineSeries());
+            _lineSeries = new LineSeries();
+            _plotModel.Series.Add(_lineSeries);
             _plotModel.InvalidatePlot(true);
         }
 
@@ -96,24 +100,8 @@ namespace PitchFinder.Models
             Update();
         }
 
-        public void FFTUpdated(object obj, Messages.FFTChangedMessage message)
+        public async void FFTUpdated(object obj, Messages.FFTChangedMessage message)
         {
-            var s = (LineSeries)PlotModel.Series[0];
-
-            s.Points.Clear();
-
-            try
-            {
-                for (int i = 0; i < message.Value.X.Length; i++)
-                {
-                    s.Points.Add(new DataPoint(message.Value.X[i], message.Value.Y[i]));
-                }
-            }
-            catch
-            {
-                return;
-            }
-
             //find the frequency peak
             int peakIndex = 0;
             for (int i = 0; i < message.Value.Y.Length; i++)
@@ -127,8 +115,23 @@ namespace PitchFinder.Models
             var chroma = _chromagram.GetChroma(message.Value.Y);
             int idx = 0;
 
+            var temp = new List<DataPoint>();
+            for (int i = 0; i < message.Value.X.Length; i++)
+            {
+                temp.Add(new DataPoint(message.Value.X[i], message.Value.Y[i]));
+            }
+
+            await App.Current.Dispatcher.BeginInvoke((System.Action)delegate
+            {
+                _lineSeries.Points.Clear();
+                _lineSeries.Points.AddRange(temp);
+
+                PlotModel.InvalidatePlot(true);
+            });
+
             _task = App.Current.Dispatcher.BeginInvoke((System.Action)delegate
             {
+
                 for (int i = 0; i < ColorMulti.Count; i++)
                 {
                     if (chroma[i] > chroma[idx])
@@ -141,8 +144,6 @@ namespace PitchFinder.Models
                 SingleFrequency = peakFrequency;
                 SingleNote = ColorMulti[idx].Text;
             });
-
-            PlotModel.InvalidatePlot(true);
         }
 
         public void Dispose()
