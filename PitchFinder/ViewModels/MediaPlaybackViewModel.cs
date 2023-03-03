@@ -2,6 +2,7 @@
 using PitchFinder.Models;
 using System;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Threading;
 
 namespace PitchFinder.ViewModels
@@ -39,6 +40,8 @@ namespace PitchFinder.ViewModels
             SliderPosition = 0;
             TimePosition = new TimeSpan(0, 0, 0).ToString("mm\\:ss");
             _timer.Stop();
+            CommandManager.InvalidateRequerySuggested();
+            OnPropertyChanged("IsPlaying");
 
             if (stoppedEventArgs.Exception != null)
             {
@@ -94,7 +97,7 @@ namespace PitchFinder.ViewModels
             {
                 if (_tempo != value)
                 {
-                    _tempo = value;
+                    _tempo = Math.Round(value, 2);
                     if (_waveStream.SoundTouchProvider != null)
                     {
                         _waveStream.SoundTouchProvider.Tempo = _tempo;
@@ -130,7 +133,6 @@ namespace PitchFinder.ViewModels
         private void Stop()
         {
             _audioHandler.Stop();
-            OnPropertyChanged("IsPlaying");
         }
 
         private void Pause()
