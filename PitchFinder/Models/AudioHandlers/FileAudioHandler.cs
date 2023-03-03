@@ -32,8 +32,6 @@ namespace PitchFinder.Models
         public void CloseFile()
         {
             WaveWrapper?.Dispose();
-            if (WaveWrapper.WaveStream != null)
-                WaveWrapper.WaveStream = null;
         }
 
         private void OpenFile(string fileName)
@@ -41,8 +39,7 @@ namespace PitchFinder.Models
             try
             {
                 var inputStream = new AudioFileReader(fileName);
-                WaveWrapper.SoundTouchProvider = new SoundTouch.Net.NAudioSupport.SoundTouchWaveProvider(inputStream);
-                WaveWrapper.WaveStream = inputStream;
+                WaveWrapper.Init(inputStream);
                 _reader = new SampleReader(inputStream.WaveFormat);
                 var aggregator = new SampleAggregator(WaveWrapper.SoundTouchProvider);
                 SampleRate = inputStream.WaveFormat.SampleRate;
@@ -162,6 +159,7 @@ namespace PitchFinder.Models
             CloseFile();
             _playbackWave?.Dispose();
             _playbackWave = null;
+            WaveWrapper = null;
         }
     }
 }

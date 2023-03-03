@@ -23,7 +23,7 @@ namespace PitchFinder.ViewModels
 
         public MediaPlaybackViewModel()
         {
-            _timer = new DispatcherTimer();
+            _waveStream = new WaveStreamWrapper();
 
             Init(typeof(FileAudioHandler));
 
@@ -89,21 +89,12 @@ namespace PitchFinder.ViewModels
             }
         }
 
-        private double _tempo;
         public double Tempo
         {
-            get => _tempo;
+            get => _waveStream.Tempo;
             set
             {
-                if (_tempo != value)
-                {
-                    _tempo = Math.Round(value, 2);
-                    if (_waveStream.SoundTouchProvider != null)
-                    {
-                        _waveStream.SoundTouchProvider.Tempo = _tempo;
-                        OnPropertyChanged("Tempo");
-                    }
-                }
+                _waveStream.Tempo = value;
             }
         }
 
@@ -171,7 +162,6 @@ namespace PitchFinder.ViewModels
 
             if (type.GetInterface(nameof(IAudioProgressBar)) != null)
             {
-                _waveStream = new WaveStreamWrapper();
                 ((IAudioProgressBar)_audioHandler).WaveWrapper = _waveStream;
                 _timer.Interval = TimeSpan.FromMilliseconds(10);
                 _timer.Tick += TimerOnTick;
