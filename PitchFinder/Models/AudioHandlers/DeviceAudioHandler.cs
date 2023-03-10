@@ -2,6 +2,7 @@
 using NAudio.CoreAudioApi;
 using NAudio.Wave;
 using PitchFinder.Controls;
+using System;
 using System.Linq;
 
 namespace PitchFinder.Models
@@ -14,6 +15,8 @@ namespace PitchFinder.Models
 
         public override bool IsPlaying => _capture != null && (_capture.CaptureState == CaptureState.Starting ^ _capture.CaptureState == CaptureState.Capturing);
         public override bool IsStopped => _capture == null || _capture.CaptureState == CaptureState.Stopped || _capture.CaptureState == CaptureState.Stopping;
+
+        public override event EventHandler<StoppedEventArgs> PlaybackStopped;
 
         private void DataAvailable(object? sender, WaveInEventArgs e)
         {
@@ -33,6 +36,7 @@ namespace PitchFinder.Models
         public override void Stop()
         {
             _capture.StopRecording();
+            PlaybackStopped.Invoke(this, new StoppedEventArgs());
         }
 
         public override bool Load()

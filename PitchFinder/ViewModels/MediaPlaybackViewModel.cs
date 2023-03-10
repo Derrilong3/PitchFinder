@@ -39,7 +39,7 @@ namespace PitchFinder.ViewModels
         {
             SliderPosition = 0;
             TimePosition = new TimeSpan(0, 0, 0).ToString("mm\\:ss");
-            _timer.Stop();
+            _timer?.Stop();
             CommandManager.InvalidateRequerySuggested();
             OnPropertyChanged("IsPlaying");
 
@@ -113,7 +113,7 @@ namespace PitchFinder.ViewModels
             try
             {
                 _audioHandler.Play();
-                _timer.Start();
+                _timer?.Start();
             }
             catch (Exception ex)
             {
@@ -129,7 +129,7 @@ namespace PitchFinder.ViewModels
         private void Pause()
         {
             _audioHandler.Pause();
-            _timer.Stop();
+            _timer?.Stop();
         }
 
         private void Load(Type audioHandler)
@@ -158,11 +158,12 @@ namespace PitchFinder.ViewModels
             _audioHandler = (IAudioHandler)Activator.CreateInstance(type);
             _audioHandler.PlaybackStopped += WavePlayerOnPlaybackStopped;
             _analyzeModel = new AudioAnalyzeModel(_audioHandler);
-            _timer = new DispatcherTimer();
+            _timer = null;
 
             if (type.GetInterface(nameof(IAudioProgressBar)) != null)
             {
                 ((IAudioProgressBar)_audioHandler).WaveWrapper = _waveStream;
+                _timer = new DispatcherTimer();
                 _timer.Interval = TimeSpan.FromMilliseconds(10);
                 _timer.Tick += TimerOnTick;
             }
