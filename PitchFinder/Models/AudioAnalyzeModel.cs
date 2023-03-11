@@ -44,18 +44,7 @@ namespace PitchFinder.Models
                 temp[i] = mag;
             }
 
-            fft.Y = temp;
-
-            double[] freqs = new double[fft.Y.Length];
-
-
-            double fftPeriodHz = (double)_handler.SampleRate / (fft.Y.Length) / 2;
-
-            // freqs start at 0 and approach maxFreq
-            for (int i = 0; i < fft.Y.Length; i++)
-                freqs[i] = i * fftPeriodHz;
-
-            fft.X = freqs;
+            fft.Fft = temp;
 
             WeakReferenceMessenger.Default.Send(new Messages.FFTChangedMessage(fft));
         }

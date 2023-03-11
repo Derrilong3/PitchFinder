@@ -6,8 +6,7 @@ namespace PitchFinder.Models
     {
         public class FFTData
         {
-            public double[] X { get; set; }
-            public double[] Y { get; set; }
+            public double[] Fft { get; set; }
         }
 
         public class FFTChangedMessage : ValueChangedMessage<FFTData>
