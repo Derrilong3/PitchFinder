@@ -17,6 +17,8 @@ namespace PitchFinder.Models
         private LineSeries _lineSeries;
         private int _sampleRate;
         private readonly string[] _noteNames = { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" };
+        private double[] Xs;
+        private double _fftPeriod;
 
         public ObservableCollection<NoteBox> ColorMulti { get; private set; }
 
@@ -97,6 +99,17 @@ namespace PitchFinder.Models
         public void SampleRateUpdated(object obj, Messages.SampleRateChangedMessage message)
         {
             _sampleRate = message.Value;
+
+            double[] freqs = new double[2048];
+
+            double fftPeriodHz = (double)_sampleRate / (2048) / 2;
+
+            for (int i = 0; i < 2048; i++)
+                freqs[i] = i * fftPeriodHz;
+            Xs = freqs;
+
+            _fftPeriod = 0.5 * _sampleRate / 2048;
+
             Update();
         }
 
@@ -104,21 +117,21 @@ namespace PitchFinder.Models
         {
             //find the frequency peak
             int peakIndex = 0;
-            for (int i = 0; i < message.Value.Y.Length; i++)
+            for (int i = 0; i < message.Value.Fft.Length; i++)
             {
-                if (message.Value.Y[i] > message.Value.Y[peakIndex])
+                if (message.Value.Fft[i] > message.Value.Fft[peakIndex])
                     peakIndex = i;
             }
-            double fftPeriod = FftSharp.Transform.FFTfreqPeriod(_sampleRate, message.Value.Y.Length);
-            float peakFrequency = (float)Math.Round((fftPeriod * peakIndex) * 100f) / 100f;
 
-            var chroma = _chromagram.GetChroma(message.Value.Y);
+            float peakFrequency = (float)Math.Round((_fftPeriod * peakIndex) * 100f) / 100f;
+
+            var chroma = _chromagram.GetChroma(message.Value.Fft);
             int idx = 0;
 
             var temp = new List<DataPoint>();
-            for (int i = 0; i < message.Value.X.Length; i++)
+            for (int i = 0; i < Xs.Length; i++)
             {
-                temp.Add(new DataPoint(message.Value.X[i], message.Value.Y[i]));
+                temp.Add(new DataPoint(Xs[i], message.Value.Fft[i]));
             }
 
             await App.Current.Dispatcher.BeginInvoke((System.Action)delegate

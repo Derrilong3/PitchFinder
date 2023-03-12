@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
 using PitchFinder.ViewModels;
-using FftSharp;
+using PitchFinder.Models;
 
 namespace PitchFinder.Menu.MenuItems
 {
