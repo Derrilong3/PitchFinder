@@ -18,6 +18,7 @@ namespace PitchFinder.Models
         private int _sampleRate;
         private readonly string[] _noteNames = { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" };
         private double[] Xs;
+        private double _fftPeriod;
 
         public ObservableCollection<NoteBox> ColorMulti { get; private set; }
 
@@ -105,8 +106,9 @@ namespace PitchFinder.Models
 
             for (int i = 0; i < 2048; i++)
                 freqs[i] = i * fftPeriodHz;
-
             Xs = freqs;
+
+            _fftPeriod = 0.5 * _sampleRate / 2048;
 
             Update();
         }
@@ -120,8 +122,8 @@ namespace PitchFinder.Models
                 if (message.Value.Fft[i] > message.Value.Fft[peakIndex])
                     peakIndex = i;
             }
-            double fftPeriod = FftSharp.Transform.FFTfreqPeriod(_sampleRate, message.Value.Fft.Length);
-            float peakFrequency = (float)Math.Round((fftPeriod * peakIndex) * 100f) / 100f;
+
+            float peakFrequency = (float)Math.Round((_fftPeriod * peakIndex) * 100f) / 100f;
 
             var chroma = _chromagram.GetChroma(message.Value.Fft);
             int idx = 0;
