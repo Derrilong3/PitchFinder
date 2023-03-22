@@ -67,7 +67,7 @@
             <Slider Value="{Binding SliderPosition, Mode=TwoWay}" IsMoveToPointEnabled="true" AutoToolTipPlacement="None" Orientation="Horizontal" VerticalAlignment="Center" Grid.Column="5" Margin="10,0,51,0" Height="18" />
             <Label Content="{Binding TimePosition}" Grid.Column="5" HorizontalAlignment="Right" VerticalAlignment="Center" Padding="5,5,15,5" UseLayoutRounding="True" ScrollViewer.CanContentScroll="True"/>
             <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Margin="0,6,0,5" Background="Black" Grid.Column="6" HorizontalAlignment="Left" Width="1"/>
-            <Slider  Value="{Binding Tempo}" Minimum="0.1" Maximum="3" Width="86" ToolTip="{Binding Tempo}" IsMoveToPointEnabled="true" AutoToolTipPlacement ="BottomRight" AutoToolTipPrecision="2" Grid.Column="6" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            <Slider IsSnapToTickEnabled="True" TickFrequency="0.05" Value="{Binding Tempo}" Minimum="0.1" Maximum="3" Width="86" ToolTip="{Binding Tempo}" IsMoveToPointEnabled="true" AutoToolTipPlacement ="BottomRight" AutoToolTipPrecision="2" Grid.Column="6" HorizontalAlignment="Center" VerticalAlignment="Center"/>
         </Grid>
 
         <dock:DockingManager x:Name="dockManager" Grid.Row="2"

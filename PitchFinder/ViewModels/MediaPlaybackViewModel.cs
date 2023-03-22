@@ -95,6 +95,8 @@ namespace PitchFinder.ViewModels
             set
             {
                 _waveStream.Tempo = value;
+
+                OnPropertyChanged("Tempo");
             }
         }
 
