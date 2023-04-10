@@ -9,7 +9,6 @@ namespace PitchFinder.Models
     {
         protected double[] _audioValues;
         protected double[] _inputBack;
-        protected string _lastPlayed;
 
         private CancellationTokenSource _cts;
         private CancellationToken _token;

@@ -9,6 +9,7 @@ namespace PitchFinder.Models
     {
         private IWavePlayer _playbackWave;
         private string _inputPath;
+        private string _lastPlayed;
 
         public WaveStreamWrapper WaveWrapper { get; set; }
         public override bool IsPlaying => _playbackWave != null && _playbackWave.PlaybackState == PlaybackState.Playing;
