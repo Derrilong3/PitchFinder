@@ -22,7 +22,7 @@ namespace PitchFinder.Models
             ReadSamples(e.Buffer);
         }
 
-        public void Load(string fileName)
+        private void Load(string fileName)
         {
             Stop();
             CloseFile();
@@ -30,7 +30,7 @@ namespace PitchFinder.Models
             OpenFile(fileName);
         }
 
-        public void CloseFile()
+        private void CloseFile()
         {
             WaveWrapper?.Dispose();
         }
@@ -60,7 +60,7 @@ namespace PitchFinder.Models
                 CreateDevice();
         }
 
-        public void CreateDevice()
+        private void CreateDevice()
         {
             _playbackWave = new WaveOutEvent { DesiredLatency = 100 };
         }
