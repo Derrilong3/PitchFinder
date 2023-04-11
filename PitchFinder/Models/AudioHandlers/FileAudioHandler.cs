@@ -5,7 +5,7 @@ using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
 
 namespace PitchFinder.Models
 {
-    class FileAudioHandler : AudioHandler, IAudioProgressBar
+    class FileAudioHandler : AudioHandler, IAudioWrapper
     {
         private IWavePlayer _playbackWave;
         private string _inputPath;

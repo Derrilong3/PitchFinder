@@ -162,9 +162,9 @@ namespace PitchFinder.ViewModels
             _analyzeModel = new AudioAnalyzeModel(_audioHandler);
             _timer = null;
 
-            if (type.GetInterface(nameof(IAudioProgressBar)) != null)
+            if (type.GetInterface(nameof(IAudioWrapper)) != null)
             {
-                ((IAudioProgressBar)_audioHandler).WaveWrapper = _waveStream;
+                ((IAudioWrapper)_audioHandler).WaveWrapper = _waveStream;
                 _timer = new DispatcherTimer();
                 _timer.Interval = TimeSpan.FromMilliseconds(10);
                 _timer.Tick += TimerOnTick;
